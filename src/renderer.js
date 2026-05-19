@@ -41,6 +41,7 @@ export class Renderer {
     this.centerId    = null;
     this.loading     = false;
     this.hoveredId   = null;
+    this.focusedId   = null;
 
     this.W = 0; this.H = 0;
     this._resize();
@@ -104,6 +105,7 @@ export class Renderer {
     drawEdges(ctx, this.edges, nodeState, this.theme);
     this._drawNodes(ctx);
     this._drawHoverRing(ctx);
+    this._drawFocusRing(ctx);
 
     ctx.restore();
 
@@ -170,6 +172,23 @@ export class Renderer {
     ctx.setLineDash([]);
     ctx.beginPath();
     ctx.arc(s.x, s.y, visualRadius(node.type, false) + 6, 0, Math.PI * 2);
+    ctx.stroke();
+    ctx.restore();
+  }
+
+  _drawFocusRing(ctx) {
+    if (!this.focusedId) return;
+    const node = this.nodes.find(n => n.id === this.focusedId);
+    if (!node || node.id === this.centerId) return;
+    const s = this.springNodes.get(node.id);
+    if (!s || s.opacity < 0.01) return;
+    ctx.save();
+    ctx.globalAlpha = 0.7;
+    ctx.strokeStyle = '#fff';
+    ctx.lineWidth   = 2;
+    ctx.setLineDash([3, 3]);
+    ctx.beginPath();
+    ctx.arc(s.x, s.y, visualRadius(node.type, false) + 8, 0, Math.PI * 2);
     ctx.stroke();
     ctx.restore();
   }

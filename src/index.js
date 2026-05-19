@@ -164,6 +164,31 @@ export class ThinkGraph {
     // Touch detection
     this._onTouchStart = () => { this._isTouch = true; };
 
+    // Keyboard navigation
+    this._keyboardIndex = -1;
+
+    this._onKeyDown = (e) => {
+      const visible = this._visibleNodes();
+      if (!visible.length) return;
+
+      if (e.key === 'Tab') {
+        e.preventDefault();
+        this._keyboardIndex = e.shiftKey
+          ? (this._keyboardIndex - 1 + visible.length) % visible.length
+          : (this._keyboardIndex + 1) % visible.length;
+        this._renderer.focusedId = visible[this._keyboardIndex].id;
+      }
+
+      if ((e.key === 'Enter' || e.key === ' ') && this._keyboardIndex >= 0) {
+        e.preventDefault();
+        const id = visible[this._keyboardIndex].id;
+        if (id !== this._centerId) this.setCenter(id);
+      }
+
+      if (e.key === 'Escape') this.resetView();
+    };
+
+    this._container.setAttribute('tabindex', '0');
     canvas.addEventListener('pointermove',  this._onMove);
     canvas.addEventListener('click',        this._onClick);
     canvas.addEventListener('pointerdown',  this._onDown);
@@ -171,6 +196,7 @@ export class ThinkGraph {
     canvas.addEventListener('pointermove',  this._onDrag);
     canvas.addEventListener('wheel',        this._onWheel, { passive: false });
     canvas.addEventListener('touchstart',   this._onTouchStart, { passive: true });
+    this._container.addEventListener('keydown', this._onKeyDown);
   }
 
   _unbindEvents() {
@@ -182,5 +208,6 @@ export class ThinkGraph {
     canvas.removeEventListener('pointermove',  this._onDrag);
     canvas.removeEventListener('wheel',        this._onWheel);
     canvas.removeEventListener('touchstart',   this._onTouchStart);
+    this._container.removeEventListener('keydown', this._onKeyDown);
   }
 }
