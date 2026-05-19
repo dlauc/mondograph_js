@@ -62,6 +62,7 @@ export class Renderer {
   get containerSize() { return { W: this.W, H: this.H }; }
 
   start() {
+    if (this._rafId != null) return;
     const loop = () => {
       tickSprings(this.springNodes, this.theme.spring, this.theme.opacitySpring);
       this._draw();
@@ -102,6 +103,7 @@ export class Renderer {
 
     drawEdges(ctx, this.edges, nodeState, this.theme);
     this._drawNodes(ctx);
+    this._drawHoverRing(ctx);
 
     ctx.restore();
 
@@ -152,19 +154,24 @@ export class Renderer {
       } else {
         drawNode(ctx, drawData, s.x, s.y, isCenter, this.theme);
       }
-
-      if (node.id === this.hoveredId && !isCenter) {
-        ctx.save();
-        ctx.globalAlpha = 0.45;
-        ctx.strokeStyle = this.theme.centerGlow;
-        ctx.lineWidth   = 2;
-        ctx.setLineDash([]);
-        ctx.beginPath();
-        ctx.arc(s.x, s.y, visualRadius(node.type, false) + 6, 0, Math.PI * 2);
-        ctx.stroke();
-        ctx.restore();
-      }
     }
+  }
+
+  _drawHoverRing(ctx) {
+    if (!this.hoveredId) return;
+    const node = this.nodes.find(n => n.id === this.hoveredId);
+    if (!node || node.id === this.centerId) return;
+    const s = this.springNodes.get(node.id);
+    if (!s || s.opacity < 0.01) return;
+    ctx.save();
+    ctx.globalAlpha = 0.45;
+    ctx.strokeStyle = this.theme.centerGlow;
+    ctx.lineWidth   = 2;
+    ctx.setLineDash([]);
+    ctx.beginPath();
+    ctx.arc(s.x, s.y, visualRadius(node.type, false) + 6, 0, Math.PI * 2);
+    ctx.stroke();
+    ctx.restore();
   }
 
   _drawSpinner(ctx, x, y) {
