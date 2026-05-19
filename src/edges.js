@@ -1,6 +1,6 @@
 /**
  * Shorten a line so its endpoint sits on the boundary of a circle.
- * Returns the original (x2,y2) if the distance is less than r.
+ * Returns the original (x2,y2) if the distance is less than r + 1 (one-pixel tolerance).
  * @param {number} x1 @param {number} y1  start point
  * @param {number} x2 @param {number} y2  end point (near the node)
  * @param {number} r  node visual radius
@@ -41,6 +41,10 @@ export function drawEdges(ctx, edges, nodeState, theme) {
     const from = nodeState.get(edge.from);
     const to   = nodeState.get(edge.to);
     if (!from || !to) continue;
+
+    // Skip zero-length edges (from and to at same position)
+    const dx0 = to.x - from.x, dy0 = to.y - from.y;
+    if (dx0 * dx0 + dy0 * dy0 < 1) continue;
 
     const cfg    = theme.edgeTypes[edge.type] ?? theme.edgeTypes._fallback;
     const weight = edge.weight ?? 1.0;

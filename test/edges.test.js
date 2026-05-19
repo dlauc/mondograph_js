@@ -94,3 +94,34 @@ test('drawEdges: uses _fallback for unknown edge type', () => {
   // Should still call stroke (used _fallback)
   assert.ok(ctx.calls.includes('stroke'));
 });
+
+test('drawEdges: draws arrowhead (fill called) when arrow:true', () => {
+  const ctx = makeMockCtx();
+  const nodeState = new Map([
+    ['a', { x:100, y:100, opacity:1, visualRadius:22 }],
+    ['b', { x:200, y:200, opacity:1, visualRadius:22 }],
+  ]);
+  const theme = {
+    edgeTypes: {
+      derives_from: { stroke:'#02b9b9', dash:[], width:1.8, arrow:true },
+      _fallback:    { stroke:'#666',    dash:[], width:1.0, arrow:false },
+    },
+  };
+  drawEdges(ctx, [{ from:'a', to:'b', type:'derives_from' }], nodeState, theme);
+  assert.ok(ctx.calls.includes('fill'), 'arrowhead fill should be called when arrow:true');
+});
+
+test('drawEdges: skips zero-length edge (from === to position)', () => {
+  const ctx = makeMockCtx();
+  const nodeState = new Map([
+    ['a', { x:100, y:100, opacity:1, visualRadius:22 }],
+    ['b', { x:100, y:100, opacity:1, visualRadius:22 }],
+  ]);
+  const theme = {
+    edgeTypes: {
+      _fallback: { stroke:'#666', dash:[], width:1, arrow:true },
+    },
+  };
+  drawEdges(ctx, [{ from:'a', to:'b', type:'derives_from' }], nodeState, theme);
+  assert.ok(!ctx.calls.includes('stroke'), 'zero-length edge should be skipped');
+});
