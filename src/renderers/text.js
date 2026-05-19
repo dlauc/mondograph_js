@@ -40,13 +40,13 @@ function drawText(ctx, node, x, y, isCenter, theme) {
   ctx.setLineDash([]);
   ctx.stroke();
 
-  const fontSize   = isCenter ? 19 : (node.label.length > 7 ? 10 : 13);
+  const fontSize   = isCenter ? 19 : ((node.label?.length ?? 0) > 7 ? 10 : 13);
   const fontWeight = isCenter ? 700 : 500;
   ctx.fillStyle    = isCenter ? stroke : '#A8E0DE';
   ctx.font         = `${fontWeight} ${fontSize}px ${theme.font}`;
   ctx.textAlign    = 'center';
   ctx.textBaseline = 'middle';
-  ctx.fillText(node.label, x, y - (isCenter ? 4 : 3));
+  ctx.fillText(node.label ?? '', x, y - (isCenter ? 4 : 3));
 
   const sub = node.lang ? node.lang.toUpperCase() : node.type.toUpperCase();
   ctx.fillStyle    = isCenter ? 'rgba(2,185,185,.5)' : 'rgba(255,255,255,.22)';
@@ -67,10 +67,10 @@ function drawConcept(ctx, node, x, y, theme) {
   ctx.stroke();
 
   ctx.fillStyle    = cfg.stroke;
-  ctx.font         = `italic 9px ${theme.font}`;
+  ctx.font         = `italic 400 9px ${theme.font}`;
   ctx.textAlign    = 'center';
   ctx.textBaseline = 'middle';
-  ctx.fillText(node.label, x, y - 3);
+  ctx.fillText(node.label ?? '', x, y - 3);
 
   ctx.fillStyle = 'rgba(232,184,75,.45)';
   ctx.font      = `400 7px ${theme.font}`;
@@ -96,7 +96,7 @@ function drawReferent(ctx, node, x, y, theme) {
   ctx.font         = `400 8.5px ${theme.font}`;
   ctx.textAlign    = 'center';
   ctx.textBaseline = 'middle';
-  ctx.fillText(node.label, x, y - 2);
+  ctx.fillText(node.label ?? '', x, y - 2);
 
   ctx.fillStyle = 'rgba(193,107,154,.5)';
   ctx.font      = `400 6.5px ${theme.font}`;
@@ -108,7 +108,7 @@ function drawElement(ctx, node, x, y, theme) {
   ctx.save();
   ctx.globalAlpha *= theme.nodeTypes.element.opacity ?? 0.6;
   ctx.beginPath();
-  ctx.rect(x - 44, y - 11, 88, 22);
+  ctx.roundRect(x - 44, y - 11, 88, 22, 11);
   ctx.fillStyle   = theme.nodeTypes.element.fill;
   ctx.fill();
   ctx.strokeStyle = stroke;
@@ -117,10 +117,10 @@ function drawElement(ctx, node, x, y, theme) {
   ctx.stroke();
 
   ctx.fillStyle    = stroke;
-  ctx.font         = `italic 8px ${theme.font}`;
+  ctx.font         = `italic 400 8px ${theme.font}`;
   ctx.textAlign    = 'center';
   ctx.textBaseline = 'middle';
-  ctx.fillText(node.label, x, y + 3);
+  ctx.fillText(node.label ?? '', x, y + 3);
   ctx.restore();
 }
 
@@ -138,5 +138,5 @@ function drawAttestation(ctx, node, x, y, theme) {
   ctx.font         = `500 6.5px ${theme.font}`;
   ctx.textAlign    = 'center';
   ctx.textBaseline = 'middle';
-  ctx.fillText(node.label, x, y + 2.5);
+  ctx.fillText(node.label ?? '', x, y + 2.5);
 }
