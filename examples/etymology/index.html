@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Etymology Explorer — ThinkGraph</title>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  body { background: #011838; color: #fff; font-family: "Noto Sans", sans-serif;
+         display: flex; flex-direction: column; height: 100vh; overflow: hidden; }
+  .bar { display: flex; align-items: center; gap: 8px; padding: 10px 16px;
+         border-bottom: 1px solid rgba(2,185,185,.15); flex-shrink: 0; }
+  .brand { color: #02b9b9; font-weight: 700; text-transform: uppercase;
+           letter-spacing: .06em; font-size: .9rem; }
+  input  { height: 2.2rem; border: 1px solid rgba(2,185,185,.4); border-right: none;
+           background: rgba(255,255,255,.05); color: #fff; font-size: .9rem;
+           padding: 0 .8rem; outline: 0; flex: 1; max-width: 280px; }
+  button { height: 2.2rem; background: #02b9b9; color: #fff; border: 0;
+           font-weight: 700; padding: 0 1rem; cursor: pointer; }
+  button:hover { background: #019b9b; }
+  #graph { flex: 1; }
+  #info  { position: fixed; bottom: 16px; left: 16px; background: #011838;
+           border: 1px solid rgba(2,185,185,.2); border-left: 3px solid #02b9b9;
+           padding: 10px 14px; max-width: 260px; font-size: .8rem; line-height: 1.6; }
+  #info h3 { color: #02b9b9; margin-bottom: 4px; }
+</style>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans:wght@400;500;700&display=swap" rel="stylesheet">
+</head>
+<body>
+<div class="bar">
+  <span class="brand">Mondonomo</span>
+  <span style="color:rgba(255,255,255,.2)">·</span>
+  <span style="color:rgba(255,255,255,.4);font-size:.8rem">Etymology Explorer</span>
+  <input id="word" type="text" value="mary" placeholder="Enter a name…">
+  <button id="go">Explore</button>
+</div>
+<div id="graph"></div>
+<div id="info"><h3 id="info-name">Mary</h3><p id="info-note">Click any node to re-centre.</p></div>
+
+<script type="module">
+import { ThinkGraph } from '/dist/thinkgraph.esm.js';
+
+const graph = new ThinkGraph({
+  container: '#graph',
+  getNeighbors: async (id) => {
+    const word = id.split('::')[0];
+    const r = await fetch(`/api/etymology/${encodeURIComponent(word)}`);
+    return r.json();
+  },
+  onSelect: (node) => {
+    document.getElementById('info-name').textContent = node.label;
+    document.getElementById('info-note').textContent =
+      node.meta?.note ?? `${node.lang ?? ''} · ${node.type}`;
+  },
+});
+
+graph.setCenter('mary::root');
+
+document.getElementById('go').addEventListener('click', () => {
+  const w = document.getElementById('word').value.trim().toLowerCase();
+  if (w) graph.setCenter(`${w}::root`);
+});
+document.getElementById('word').addEventListener('keydown', e => {
+  if (e.key === 'Enter') document.getElementById('go').click();
+});
+</script>
+</body>
+</html>
