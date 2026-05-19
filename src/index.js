@@ -27,10 +27,11 @@ export class ThinkGraph {
     this._tooltip  = new Tooltip(this._container);
     if (opts.renderTooltip) this._tooltip.setRenderFn(opts.renderTooltip);
 
-    this._nodes    = [];
-    this._edges    = [];
-    this._centerId = null;
-    this._isTouch  = false;
+    this._nodes      = [];
+    this._edges      = [];
+    this._centerId   = null;
+    this._isTouch    = false;
+    this._setCenterSeq = 0;
 
     this._bindEvents();
     this._renderer.start();
@@ -38,11 +39,15 @@ export class ThinkGraph {
 
   /** Load the neighbourhood of `id` and animate to it. */
   async setCenter(id) {
+    const seq = ++this._setCenterSeq;
     this._centerId          = id;
     this._renderer.centerId = id;
     this._renderer.loading  = true;
 
     const { nodes, edges } = await this._opts.getNeighbors(id);
+
+    if (seq !== this._setCenterSeq) return;
+
     this._renderer.loading  = false;
 
     const newIds  = new Set(nodes.map(n => n.id));
@@ -81,7 +86,7 @@ export class ThinkGraph {
 
   /** Hot-swap theme at runtime. */
   setTheme(t) {
-    this._theme          = resolveTheme(t);
+    this._theme          = resolveTheme(typeof t === 'object' && t ? { ...this._theme, ...t } : t);
     this._renderer.theme = this._theme;
   }
 
