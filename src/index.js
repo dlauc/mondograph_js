@@ -78,6 +78,9 @@ export class ThinkGraph {
     this._renderer.nodes = nodes;
     this._renderer.edges = edges;
 
+    this._keyboardIndex = -1;
+    this._renderer.focusedId = null;
+
     this._tooltip.setContainerSize(W, H);
 
     const centerNode = nodes.find(n => n.id === id);
@@ -179,7 +182,7 @@ export class ThinkGraph {
         this._renderer.focusedId = visible[this._keyboardIndex].id;
       }
 
-      if ((e.key === 'Enter' || e.key === ' ') && this._keyboardIndex >= 0) {
+      if ((e.key === 'Enter' || e.key === ' ') && this._keyboardIndex >= 0 && this._keyboardIndex < visible.length) {
         e.preventDefault();
         const id = visible[this._keyboardIndex].id;
         if (id !== this._centerId) this.setCenter(id);
