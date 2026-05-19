@@ -52,17 +52,30 @@ export class ThinkGraph {
     const seq = ++this._setCenterSeq;
     this._centerId          = id;
     this._renderer.centerId = id;
-    this._renderer.loading  = true;
+
+    // Move the clicked node to centre immediately so animation starts before fetch.
+    const { W, H } = this._renderer.containerSize;
+    const existing = this._renderer.springNodes.get(id);
+    if (existing) {
+      existing.targetX = W / 2;
+      existing.targetY = H / 2;
+      existing.targetOpacity = 1;
+    }
+
+    // Only show spinner if fetch takes longer than 150 ms.
+    const spinnerTimer = setTimeout(() => { this._renderer.loading = true; }, 150);
 
     const { nodes, edges } = await this._opts.getNeighbors(id);
+    clearTimeout(spinnerTimer);
 
     if (seq !== this._setCenterSeq) return;
 
     this._renderer.loading  = false;
 
     const newIds  = new Set(nodes.map(n => n.id));
-    const { W, H } = this._renderer.containerSize;
-    const targets  = computeTargets(id, nodes, edges, W, H);
+    // W, H already captured above; re-read in case of resize during fetch.
+    const { W: W2, H: H2 } = this._renderer.containerSize;
+    const targets  = computeTargets(id, nodes, edges, W2, H2);
 
     // Fade out nodes leaving the scene
     for (const [nid, s] of this._renderer.springNodes) {
@@ -73,7 +86,7 @@ export class ThinkGraph {
     for (const node of nodes) {
       if (!this._renderer.springNodes.has(node.id)) {
         const jitter = () => (Math.random() - 0.5) * 40;
-        const s = createSpringNode(W / 2 + jitter(), H / 2 + jitter(), 0);
+        const s = createSpringNode(W2 / 2 + jitter(), H2 / 2 + jitter(), 0);
         s.vx = (Math.random() - 0.5) * 4;
         s.vy = (Math.random() - 0.5) * 4;
         this._renderer.springNodes.set(node.id, s);
@@ -91,7 +104,7 @@ export class ThinkGraph {
     this._keyboardIndex = -1;
     this._renderer.focusedId = null;
 
-    this._tooltip.setContainerSize(W, H);
+    this._tooltip.setContainerSize(W2, H2);
 
     const centerNode = nodes.find(n => n.id === id);
     if (centerNode && this._opts.onSelect) this._opts.onSelect(centerNode);

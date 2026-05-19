@@ -4,8 +4,8 @@ const MONDONOMO = {
   centerGlow:   '#02b9b9',
   font:         '"Noto Sans", sans-serif',
   fontWeight:   { label: 700, sub: 400 },
-  spring:       { K: 0.10, damping: 0.74 },
-  opacitySpring:{ K: 0.12, damping: 0.80 },
+  spring:       { K: 0.08, damping: 0.78 },
+  opacitySpring:{ K: 0.14, damping: 0.82 },
 
   langColors: {
     English:      '#02b9b9',
