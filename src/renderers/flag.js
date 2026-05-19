@@ -26,9 +26,13 @@ export function drawFlagNode(ctx, node, x, y, isCenter, theme) {
     ctx.drawImage(bitmap, x - r, y - r, r * 2, r * 2);
     ctx.restore();
   } else {
-    ctx.fillStyle = '#020f20';
+    if (bitmap === 'error') {
+      ctx.fillStyle = '#2a3a4a';
+    } else {
+      ctx.fillStyle = theme.centerGlow;  // teal placeholder while loading
+    }
     ctx.fill();
-    if (node.imageUrl && bitmap !== 'loading') _load(node.imageUrl);
+    if (node.imageUrl && bitmap !== 'loading' && bitmap !== 'error') _load(node.imageUrl);
   }
 
   ctx.strokeStyle = theme.nodeTypes.flag.stroke;
