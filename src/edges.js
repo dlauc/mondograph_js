@@ -1,0 +1,66 @@
+/**
+ * Shorten a line so its endpoint sits on the boundary of a circle.
+ * Returns the original (x2,y2) if the distance is less than r.
+ * @param {number} x1 @param {number} y1  start point
+ * @param {number} x2 @param {number} y2  end point (near the node)
+ * @param {number} r  node visual radius
+ * @returns {{ x:number, y:number }}
+ */
+export function clipToRadius(x1, y1, x2, y2, r) {
+  const dx = x2 - x1, dy = y2 - y1;
+  const len = Math.hypot(dx, dy);
+  if (len < r + 1) return { x: x2, y: y2 };
+  return { x: x2 - (dx / len) * r, y: y2 - (dy / len) * r };
+}
+
+function drawArrowhead(ctx, x1, y1, x2, y2, color) {
+  const angle = Math.atan2(y2 - y1, x2 - x1);
+  const size  = 7;
+  ctx.save();
+  ctx.fillStyle = color;
+  ctx.translate(x2, y2);
+  ctx.rotate(angle);
+  ctx.beginPath();
+  ctx.moveTo(0, 0);
+  ctx.lineTo(-size,  size / 2);
+  ctx.lineTo(-size, -size / 2);
+  ctx.closePath();
+  ctx.fill();
+  ctx.restore();
+}
+
+/**
+ * Draw all edges for the current frame.
+ * @param {CanvasRenderingContext2D} ctx
+ * @param {Array<{from:string,to:string,type:string,weight?:number}>} edges
+ * @param {Map<string,{x:number,y:number,opacity:number,visualRadius:number}>} nodeState
+ * @param {object} theme  resolveTheme() output
+ */
+export function drawEdges(ctx, edges, nodeState, theme) {
+  for (const edge of edges) {
+    const from = nodeState.get(edge.from);
+    const to   = nodeState.get(edge.to);
+    if (!from || !to) continue;
+
+    const cfg    = theme.edgeTypes[edge.type] ?? theme.edgeTypes._fallback;
+    const weight = edge.weight ?? 1.0;
+    const alpha  = Math.min(from.opacity, to.opacity) * weight;
+
+    const extraR = cfg.arrow ? 7 : 0;
+    const ep     = clipToRadius(from.x, from.y, to.x, to.y, to.visualRadius + extraR);
+
+    ctx.save();
+    ctx.globalAlpha = alpha;
+    ctx.strokeStyle = cfg.stroke;
+    ctx.lineWidth   = cfg.width * weight;
+    ctx.setLineDash(cfg.dash);
+    ctx.beginPath();
+    ctx.moveTo(from.x, from.y);
+    ctx.lineTo(ep.x, ep.y);
+    ctx.stroke();
+
+    if (cfg.arrow) drawArrowhead(ctx, from.x, from.y, ep.x, ep.y, cfg.stroke);
+
+    ctx.restore();
+  }
+}
