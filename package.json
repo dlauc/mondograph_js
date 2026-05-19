@@ -1,0 +1,21 @@
+{
+  "name": "thinkgraph",
+  "version": "0.1.0",
+  "type": "module",
+  "main": "dist/thinkgraph.umd.js",
+  "module": "dist/thinkgraph.esm.js",
+  "exports": {
+    ".": {
+      "import": "./dist/thinkgraph.esm.js",
+      "default": "./dist/thinkgraph.umd.js"
+    }
+  },
+  "scripts": {
+    "test":  "node --test test/**/*.test.js",
+    "build": "node build.js",
+    "dev":   "node --watch --test test/**/*.test.js"
+  },
+  "devDependencies": {
+    "esbuild": "^0.21.0"
+  }
+}
