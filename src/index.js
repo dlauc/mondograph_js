@@ -33,6 +33,16 @@ export class ThinkGraph {
     this._isTouch    = false;
     this._setCenterSeq = 0;
 
+    this._renderer.onResize = (W, H) => {
+      if (!this._centerId || !this._nodes.length) return;
+      const targets = computeTargets(this._centerId, this._nodes, this._edges, W, H);
+      for (const [id, s] of this._renderer.springNodes) {
+        const t = targets.get(id);
+        if (t) { s.targetX = t.x; s.targetY = t.y; }
+      }
+      this._tooltip.setContainerSize(W, H);
+    };
+
     this._bindEvents();
     this._renderer.start();
   }
@@ -122,16 +132,25 @@ export class ThinkGraph {
     return { x: e.clientX - r.left, y: e.clientY - r.top };
   }
 
+  _worldXY(e) {
+    const { x, y } = this._canvasXY(e);
+    return {
+      x: (x - this._renderer._panX) / this._renderer._scale,
+      y: (y - this._renderer._panY) / this._renderer._scale,
+    };
+  }
+
   _bindEvents() {
     const canvas = this._renderer.canvas;
 
     this._onMove = (e) => {
       const { x, y } = this._canvasXY(e);
-      const id = hitTest(x, y, this._visibleNodes());
+      const { x: wx, y: wy } = this._worldXY(e);
+      const id = hitTest(wx, wy, this._visibleNodes());
       this._renderer.hoveredId = id;
       if (id) {
         const node = this._nodes.find(n => n.id === id);
-        if (node) this._tooltip.show(node, x, y);
+        if (node) this._tooltip.show(node, x, y);   // tooltip still uses screen coords
       } else {
         this._tooltip.hide();
       }
@@ -139,10 +158,11 @@ export class ThinkGraph {
 
     this._onClick = (e) => {
       const { x, y } = this._canvasXY(e);
-      // Reset button area (top-right 40×40)
+      // Reset button area (top-right 40×40) — screen space, no transform needed
       const W = this._renderer.W;
       if (x > W - 40 && y < 40) { this.resetView(); return; }
-      const id = hitTest(x, y, this._visibleNodes());
+      const { x: wx, y: wy } = this._worldXY(e);
+      const id = hitTest(wx, wy, this._visibleNodes());
       if (id && id !== this._centerId) this.setCenter(id);
     };
 

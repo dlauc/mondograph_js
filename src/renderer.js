@@ -44,6 +44,7 @@ export class Renderer {
     this.focusedId   = null;
 
     this.W = 0; this.H = 0;
+    this.onResize = null;
     this._resize();
 
     this._ro = new ResizeObserver(() => this._resize());
@@ -58,6 +59,7 @@ export class Renderer {
     this.canvas.height = H * dpr;
     this.W = W; this.H = H;
     this.ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    if (this.onResize) this.onResize(this.W, this.H);
   }
 
   get containerSize() { return { W: this.W, H: this.H }; }
@@ -66,6 +68,10 @@ export class Renderer {
     if (this._rafId != null) return;
     const loop = () => {
       tickSprings(this.springNodes, this.theme.spring, this.theme.opacitySpring);
+      // Prune fully-faded departed nodes to prevent unbounded Map growth
+      for (const [id, s] of this.springNodes) {
+        if (s.opacity < 0.01 && s.targetOpacity === 0) this.springNodes.delete(id);
+      }
       this._draw();
       this._rafId = requestAnimationFrame(loop);
     };
