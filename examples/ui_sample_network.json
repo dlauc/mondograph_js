@@ -1,0 +1,170 @@
+{
+  "_comment": "Sample name network for graphical-interface development. Data is illustrative, not authoritative — accuracy was traded for richness and variety of predicates. Anchors: radovan-hr, muhammad-ar, friedrich-de, hiroshi-ja. Popularity is a rough current-bearers estimate (per country, all-time-living) unless noted; rank is national rank among given names (lower = more common).",
+  "predicates_used": [
+    "derived-from", "borrowed-from", "contracted-from", "contains-element",
+    "compound-of", "variant-of", "transliteration-of", "hypocorism-of",
+    "nickname-of", "opposite-gender-of", "feminine-of", "masculine-of",
+    "patronymic-of", "named-after", "cognate-of", "augmentative-of",
+    "phonetic-loan-of", "translation-of", "interlingual-equivalent-of",
+    "religious-name-of", "meaning"
+  ],
+
+  "nodes": [
+    { "id": "radovan-hr",     "type": "form",   "form": "Radovan",      "lang": "hrv", "script": "Latn", "ipa": "rǎdoʋaːn",   "wikidata_qid": "Q1054170", "attrs": { "gender": "m", "popularity": { "hr": { "bearers": 2400, "rank": 180 }, "rs": { "bearers": 5200, "rank": 95 }, "ba": { "bearers": 620, "rank": 1100 }, "si": { "bearers": 190, "rank": 1600 }, "me": { "bearers": 140, "rank": 1800 } } } },
+    { "id": "radovan-sr",     "type": "form",   "form": "Радован",      "lang": "srp", "script": "Cyrl", "ipa": "rǎdoʋaːn",   "attrs": { "gender": "m", "popularity": { "rs": { "bearers": 5200,  "rank": 95 } } } },
+    { "id": "radovan-bg",     "type": "form",   "form": "Радован",      "lang": "bul", "script": "Cyrl", "ipa": "radoˈvan",   "attrs": { "gender": "m", "popularity": { "bg": { "bearers": 320,   "rank": 1400 } } } },
+    { "id": "radovan-mk",     "type": "form",   "form": "Радован",      "lang": "mkd", "script": "Cyrl", "ipa": "raˈdovan", "attrs": { "gender": "m", "popularity": { "mk": { "bearers": 410, "rank": 620 } } } },
+    { "id": "radovan-cz",     "type": "form",   "form": "Radovan",      "lang": "ces", "script": "Latn", "ipa": "ˈradovan",   "attrs": { "gender": "m", "popularity": { "cz": { "bearers": 18000, "rank": 88 } } } },
+    { "id": "radovan-sk",     "type": "form",   "form": "Radovan",      "lang": "slk", "script": "Latn", "attrs": { "gender": "m", "popularity": { "sk": { "bearers": 6700,  "rank": 130 } } } },
+    { "id": "rzadovan-cz-archaic", "type": "form", "form": "Řadovan",  "lang": "ces", "script": "Latn", "ipa": "ˈr̝adovan", "attrs": { "gender": "m", "register": "archaic-poetic", "popularity": { "cz": { "bearers": 3, "note": "near-extinct dialectal spelling" } } } },
+
+    { "id": "rade-hr",        "type": "form",   "form": "Rade",         "lang": "hrv", "script": "Latn", "attrs": { "gender": "m", "popularity": { "hr": { "bearers": 4100, "rank": 140 }, "rs": { "bearers": 12000, "rank": 60 } } } },
+    { "id": "rado-hr",        "type": "form",   "form": "Rado",         "lang": "hrv", "script": "Latn", "attrs": { "gender": "m", "popularity": { "hr": { "bearers": 600,  "rank": 990 } } } },
+    { "id": "radek-cz",       "type": "form",   "form": "Radek",        "lang": "ces", "script": "Latn", "attrs": { "gender": "m", "popularity": { "cz": { "bearers": 41000, "rank": 22 } } } },
+    { "id": "radko-bg",       "type": "form",   "form": "Радко",        "lang": "bul", "script": "Cyrl", "attrs": { "gender": "m", "popularity": { "bg": { "bearers": 1200, "rank": 480 } } } },
+
+    { "id": "radovana-hr",    "type": "form",   "form": "Radovana",     "lang": "hrv", "script": "Latn", "attrs": { "gender": "f", "popularity": { "hr": { "bearers": 180, "rank": 1900 } } } },
+    { "id": "radoslav-hr",    "type": "form",   "form": "Radoslav",     "lang": "hrv", "script": "Latn", "attrs": { "gender": "m", "popularity": { "hr": { "bearers": 5400, "rank": 110 }, "cz": { "bearers": 12000, "rank": 75 } } } },
+    { "id": "radoslava-hr",   "type": "form",   "form": "Radoslava",    "lang": "hrv", "script": "Latn", "attrs": { "gender": "f", "popularity": { "hr": { "bearers": 220, "rank": 1700 } } } },
+    { "id": "radoslaw-pl",    "type": "form",   "form": "Radosław",     "lang": "pol", "script": "Latn", "ipa": "raˈdɔswaf", "attrs": { "gender": "m", "popularity": { "pl": { "bearers": 78000, "rank": 38 } } } },
+    { "id": "radovanovic-sr", "type": "form",   "form": "Радовановић",  "lang": "srp", "script": "Cyrl", "attrs": { "form_kind": "surname", "popularity": { "rs": { "bearers": 9800, "rank": 200, "kind": "surname" } } } },
+
+    { "id": "etym-rad-psl",   "type": "etymon", "form": "*radъ",        "lang": "sla-pro", "period": "Proto-Slavic", "attrs": { "meaning_en": "glad, joyful" } },
+    { "id": "etym-slav-psl",  "type": "etymon", "form": "*slava",       "lang": "sla-pro", "period": "Proto-Slavic", "attrs": { "meaning_en": "glory, fame" } },
+    { "id": "concept-joy",    "type": "concept", "wikidata_qid": "Q33971", "attrs": { "label_en": "joy / gladness" } },
+
+    { "id": "hilarius-la",    "type": "form",   "form": "Hilarius",     "lang": "lat", "script": "Latn", "attrs": { "gender": "m", "meaning_en": "cheerful", "period": "Late Latin" } },
+    { "id": "ref-karadzic",   "type": "referent", "wikidata_qid": "Q170351", "attrs": { "label_en": "Radovan Karadžić", "domain": "politics" } },
+
+
+    { "id": "muhammad-ar",    "type": "form",   "form": "مُحَمَّد",         "lang": "ara", "script": "Arab", "ipa": "muˈħam.mad", "wikidata_qid": "Q4915", "attrs": { "gender": "m", "meaning_en": "praiseworthy, praised one", "popularity": { "sa": { "bearers": 1200000, "rank": 1 }, "eg": { "bearers": 8500000, "rank": 1 }, "pk": { "bearers": 7200000, "rank": 1 }, "ng": { "bearers": 4100000, "rank": 1 }, "id": { "bearers": 3800000, "rank": 1 }, "bd": { "bearers": 2900000, "rank": 1 }, "ir": { "bearers": 1500000, "rank": 2 }, "ma": { "bearers": 1400000, "rank": 1 }, "dz": { "bearers": 1100000, "rank": 1 }, "world": { "bearers": 150000000, "rank": 1, "note": "most common male given name globally" } } } },
+    { "id": "muhammad-en",    "type": "form",   "form": "Muhammad",     "lang": "eng", "script": "Latn", "attrs": { "gender": "m", "popularity": { "gb": { "bearers": 64000, "rank": 1, "year": 2024, "note": "UK newborns #1 if all spellings combined" }, "us": { "bearers": 32000, "rank": 380 } } } },
+    { "id": "mohammed-en",    "type": "form",   "form": "Mohammed",     "lang": "eng", "script": "Latn", "attrs": { "gender": "m", "popularity": { "gb": { "bearers": 41000 }, "nl": { "bearers": 19000, "rank": 36 } } } },
+    { "id": "mohamad-en",     "type": "form",   "form": "Mohamad",      "lang": "eng", "script": "Latn", "attrs": { "gender": "m", "popularity": { "lb": { "bearers": 28000 } } } },
+    { "id": "muhamed-bs",     "type": "form",   "form": "Muhamed",      "lang": "bos", "script": "Latn", "attrs": { "gender": "m", "popularity": { "ba": { "bearers": 22000, "rank": 8 } } } },
+    { "id": "mehmet-tr",      "type": "form",   "form": "Mehmet",       "lang": "tur", "script": "Latn", "ipa": "mehˈmet", "attrs": { "gender": "m", "popularity": { "tr": { "bearers": 1300000, "rank": 3 } } } },
+    { "id": "mehmed-bs",      "type": "form",   "form": "Mehmed",       "lang": "bos", "script": "Latn", "attrs": { "gender": "m", "popularity": { "ba": { "bearers": 7400, "rank": 60 } } } },
+    { "id": "mamadou-wo",     "type": "form",   "form": "Mamadou",      "lang": "wol", "script": "Latn", "attrs": { "gender": "m", "popularity": { "sn": { "bearers": 380000, "rank": 1 }, "gn": { "bearers": 210000, "rank": 1 }, "ml": { "bearers": 190000, "rank": 1 }, "bf": { "bearers": 140000, "rank": 2 }, "ci": { "bearers": 95000, "rank": 3 } } } },
+    { "id": "hamadi-sw",      "type": "form",   "form": "Hamadi",       "lang": "swa", "script": "Latn", "attrs": { "gender": "m", "popularity": { "tz": { "bearers": 41000, "rank": 90 }, "ke": { "bearers": 18000, "rank": 180 }, "ug": { "bearers": 12000, "rank": 210 } } } },
+    { "id": "ahmad-ar",       "type": "form",   "form": "أَحْمَد",        "lang": "ara", "script": "Arab", "ipa": "ˈʔaħmad", "attrs": { "gender": "m", "meaning_en": "more praiseworthy", "popularity": { "sa": { "bearers": 410000, "rank": 4 }, "pk": { "bearers": 320000, "rank": 6 }, "id": { "bearers": 280000, "rank": 8 }, "eg": { "bearers": 240000, "rank": 9 }, "my": { "bearers": 190000, "rank": 3 } } } },
+    { "id": "hamid-ar",       "type": "form",   "form": "حَامِد",         "lang": "ara", "script": "Arab", "ipa": "ħæˈmiːd", "attrs": { "gender": "m", "meaning_en": "praising one", "popularity": { "ir": { "bearers": 290000, "rank": 12 }, "pk": { "bearers": 95000, "rank": 45 }, "sa": { "bearers": 78000, "rank": 18 } } } },
+    { "id": "mahmoud-ar",     "type": "form",   "form": "مَحْمُود",        "lang": "ara", "script": "Arab", "ipa": "mæħˈmuːd", "attrs": { "gender": "m", "meaning_en": "praised", "popularity": { "eg": { "bearers": 980000, "rank": 6 }, "sa": { "bearers": 210000, "rank": 7 }, "ma": { "bearers": 180000, "rank": 5 }, "dz": { "bearers": 145000, "rank": 4 } } } },
+
+    { "id": "etym-hmd-root",  "type": "etymon", "form": "ح م د",        "lang": "ara", "script": "Arab", "attrs": { "meaning_en": "to praise", "kind": "triliteral-root" } },
+    { "id": "ref-prophet",    "type": "referent", "wikidata_qid": "Q9458", "attrs": { "label_en": "Prophet Muhammad", "domain": "religion" } },
+
+
+    { "id": "friedrich-de",   "type": "form",   "form": "Friedrich",    "lang": "deu", "script": "Latn", "ipa": "ˈfʁiːdʁɪç", "wikidata_qid": "Q156187", "attrs": { "gender": "m", "meaning_en": "peaceful ruler", "popularity": { "de": { "bearers": 95000, "rank": 70 }, "at": { "bearers": 18000, "rank": 55 }, "ch": { "bearers": 8200, "rank": 90 }, "nl": { "bearers": 3100, "rank": 310 }, "pl": { "bearers": 1800, "rank": 1200 }, "us": { "bearers": 1100, "rank": 2800 }, "world": { "bearers": 135000, "note": "rough global estimate" } } } },
+    { "id": "fritz-de",       "type": "form",   "form": "Fritz",        "lang": "deu", "script": "Latn", "attrs": { "gender": "m", "register": "hypocoristic", "popularity": { "de": { "bearers": 110000, "rank": 60 } } } },
+    { "id": "fred-en",        "type": "form",   "form": "Fred",         "lang": "eng", "script": "Latn", "attrs": { "gender": "m", "register": "hypocoristic", "popularity": { "us": { "bearers": 410000, "rank": 240 }, "gb": { "bearers": 180000, "rank": 95 }, "au": { "bearers": 95000, "rank": 130 }, "ca": { "bearers": 78000, "rank": 160 } } } },
+    { "id": "frederick-en",   "type": "form",   "form": "Frederick",    "lang": "eng", "script": "Latn", "ipa": "ˈfɹɛdɹɪk",  "attrs": { "gender": "m", "popularity": { "gb": { "bearers": 88000, "rank": 64 }, "us": { "bearers": 220000, "rank": 110 }, "au": { "bearers": 32000, "rank": 185 }, "ca": { "bearers": 28000, "rank": 190 }, "nz": { "bearers": 8400, "rank": 230 } } } },
+    { "id": "frederic-fr",    "type": "form",   "form": "Frédéric",     "lang": "fra", "script": "Latn", "ipa": "fʁedeʁik",   "attrs": { "gender": "m", "popularity": { "fr": { "bearers": 280000, "rank": 28 }, "be": { "bearers": 42000, "rank": 35 }, "ca": { "bearers": 18000, "rank": 80 }, "ch": { "bearers": 11000, "rank": 95 } } } },
+    { "id": "federico-it",    "type": "form",   "form": "Federico",     "lang": "ita", "script": "Latn", "attrs": { "gender": "m", "popularity": { "it": { "bearers": 320000, "rank": 19 }, "es": { "bearers": 95000, "rank": 90 }, "ar": { "bearers": 38000, "rank": 140 } } } },
+    { "id": "fridrih-ru",     "type": "form",   "form": "Фридрих",      "lang": "rus", "script": "Cyrl", "ipa": "ˈfrʲidrʲɪx", "attrs": { "gender": "m", "popularity": { "ru": { "bearers": 4200, "rank": 1100 }, "kz": { "bearers": 320, "rank": 2800 } } } },
+    { "id": "frederika-de",   "type": "form",   "form": "Friederike",   "lang": "deu", "script": "Latn", "attrs": { "gender": "f", "popularity": { "de": { "bearers": 52000, "rank": 140 } } } },
+    { "id": "frederica-it",   "type": "form",   "form": "Federica",     "lang": "ita", "script": "Latn", "attrs": { "gender": "f", "popularity": { "it": { "bearers": 240000, "rank": 22 } } } },
+
+    { "id": "elem-frid-ohg",  "type": "element", "form": "fridu",       "lang": "goh", "script": "Latn", "period": "Old High German", "attrs": { "meaning_en": "peace" } },
+    { "id": "elem-rihhi-ohg", "type": "element", "form": "rīhhi",       "lang": "goh", "script": "Latn", "period": "Old High German", "attrs": { "meaning_en": "ruler, mighty" } },
+    { "id": "etym-frithuz-pg","type": "etymon", "form": "*friþuz",      "lang": "gem-pro", "period": "Proto-Germanic", "attrs": { "meaning_en": "peace, refuge" } },
+    { "id": "etym-rikijaz-pg","type": "etymon", "form": "*rīkijaz",     "lang": "gem-pro", "period": "Proto-Germanic", "attrs": { "meaning_en": "kingly, mighty" } },
+    { "id": "ref-pope-fr",    "type": "referent", "wikidata_qid": "Q4504", "attrs": { "label_en": "Frederick the Great", "domain": "history" } },
+
+    { "id": "mirko-hr",       "type": "form",   "form": "Mirko",        "lang": "hrv", "script": "Latn", "attrs": { "gender": "m", "meaning_en": "peaceful one", "popularity": { "hr": { "bearers": 28000, "rank": 50 }, "rs": { "bearers": 33000, "rank": 45 } } } },
+
+
+    { "id": "hiroshi-ja-kanji-kan",  "type": "form", "form": "寛",         "lang": "jpn", "script": "Jpan", "ipa": "çiɾoɕi", "attrs": { "gender": "m", "writing": "kanji", "kanji_gloss_en": "tolerant, generous", "popularity": { "jp": { "bearers": 220000, "rank": 35 }, "world": { "bearers": 720000, "note": "all-Hiroshi kanji variants combined" } } } },
+    { "id": "hiroshi-ja-kanji-koh",  "type": "form", "form": "浩",         "lang": "jpn", "script": "Jpan", "ipa": "çiɾoɕi", "attrs": { "gender": "m", "writing": "kanji", "kanji_gloss_en": "vast, prosperous", "popularity": { "jp": { "bearers": 310000, "rank": 22 } } } },
+    { "id": "hiroshi-ja-kanji-hiro", "type": "form", "form": "博",         "lang": "jpn", "script": "Jpan", "ipa": "çiɾoɕi", "attrs": { "gender": "m", "writing": "kanji", "kanji_gloss_en": "broad, extensive", "popularity": { "jp": { "bearers": 140000, "rank": 48 } } } },
+    { "id": "hiroshi-ja-hira",       "type": "form", "form": "ひろし",      "lang": "jpn", "script": "Hira", "ipa": "çiɾoɕi", "attrs": { "gender": "m", "writing": "hiragana", "popularity": { "jp": { "bearers": 28000, "rank": 90 } } } },
+    { "id": "hiroshi-ja-kata",       "type": "form", "form": "ヒロシ",      "lang": "jpn", "script": "Kana", "ipa": "çiɾoɕi", "attrs": { "gender": "m", "writing": "katakana", "popularity": { "jp": { "bearers": 4200, "rank": 380 } } } },
+    { "id": "hiroshi-rom",           "type": "form", "form": "Hiroshi",   "lang": "jpn", "script": "Latn", "ipa": "çiɾoɕi", "attrs": { "gender": "m", "writing": "romaji", "popularity": { "jp": { "bearers": 12000, "rank": 150 }, "us": { "bearers": 8400, "rank": 1800 } } } },
+    { "id": "hiro-rom",              "type": "form", "form": "Hiro",      "lang": "jpn", "script": "Latn", "ipa": "çiɾo", "attrs": { "gender": "m", "register": "hypocoristic", "popularity": { "jp": { "bearers": 41000, "rank": 240 }, "us": { "bearers": 3200, "rank": 4200 } } } },
+    { "id": "hiroko-rom",            "type": "form", "form": "Hiroko",    "lang": "jpn", "script": "Latn", "ipa": "çiɾoko", "attrs": { "gender": "f", "popularity": { "jp": { "bearers": 530000, "rank": 18 }, "us": { "bearers": 4100, "rank": 3800 } } } },
+    { "id": "hiroko-ja",             "type": "form", "form": "裕子",       "lang": "jpn", "script": "Jpan", "ipa": "çiɾoko", "attrs": { "gender": "f", "kanji_gloss_en": "abundant + child", "popularity": { "jp": { "bearers": 530000, "rank": 18 } } } },
+
+    { "id": "elem-hiro-ja",  "type": "element", "form": "ひろ",            "lang": "jpn", "script": "Hira", "attrs": { "meaning_en": "broad, vast" } },
+    { "id": "elem-shi-ja",   "type": "element", "form": "し",              "lang": "jpn", "script": "Hira", "attrs": { "meaning_en": "warrior / man (古語 suffix)" } },
+    { "id": "concept-broad", "type": "concept", "wikidata_qid": null,   "attrs": { "label_en": "vastness / breadth" } },
+    { "id": "ref-mifune",    "type": "referent", "wikidata_qid": "Q187856", "attrs": { "label_en": "Hiroshi Mikitani", "domain": "business" } }
+  ],
+
+  "edges": [
+    { "src": "radovan-hr", "predicate": "compound-of",    "dst": "etym-rad-psl",   "attrs": { "order": 0, "confidence": 0.95 } },
+    { "src": "radoslav-hr","predicate": "compound-of",    "dst": "etym-rad-psl",   "attrs": { "order": 0 } },
+    { "src": "radoslav-hr","predicate": "compound-of",    "dst": "etym-slav-psl",  "attrs": { "order": 1 } },
+    { "src": "etym-rad-psl","predicate":"meaning",        "dst": "concept-joy",    "attrs": {} },
+
+    { "src": "radovan-sr", "predicate": "transliteration-of", "dst": "radovan-hr", "attrs": { "direction": "Latn→Cyrl" } },
+    { "src": "radovan-bg", "predicate": "variant-of",     "dst": "radovan-hr",     "attrs": { "note": "same form, distinct national tradition" } },
+    { "src": "radovan-mk", "predicate": "variant-of",     "dst": "radovan-hr",     "attrs": {} },
+    { "src": "radovan-cz", "predicate": "variant-of",     "dst": "radovan-hr",     "attrs": {} },
+    { "src": "radovan-sk", "predicate": "variant-of",     "dst": "radovan-cz",     "attrs": {} },
+    { "src": "rzadovan-cz-archaic", "predicate":"variant-of", "dst":"radovan-cz",  "attrs": { "note": "stylised dialectal/poetic spelling with ř" } },
+
+    { "src": "rade-hr",    "predicate": "hypocorism-of",  "dst": "radovan-hr",     "attrs": {} },
+    { "src": "rado-hr",    "predicate": "hypocorism-of",  "dst": "radovan-hr",     "attrs": {} },
+    { "src": "radek-cz",   "predicate": "hypocorism-of",  "dst": "radovan-cz",     "attrs": { "note": "diminutive -ek" } },
+    { "src": "radko-bg",   "predicate": "hypocorism-of",  "dst": "radovan-bg",     "attrs": {} },
+
+    { "src": "radovana-hr","predicate": "feminine-of",    "dst": "radovan-hr",     "attrs": {} },
+    { "src": "radoslava-hr","predicate":"feminine-of",    "dst": "radoslav-hr",    "attrs": {} },
+    { "src": "radoslav-hr","predicate": "cognate-of",     "dst": "radovan-hr",     "attrs": { "note": "share first element *radъ" } },
+    { "src": "radoslaw-pl","predicate": "cognate-of",     "dst": "radoslav-hr",    "attrs": {} },
+    { "src": "radovanovic-sr","predicate": "patronymic-of","dst": "radovan-sr",    "attrs": { "suffix": "-ović" } },
+
+    { "src": "radovan-hr", "predicate": "named-after",    "dst": "ref-karadzic",   "attrs": { "kind": "notable-bearer", "confidence": 0.4 } },
+    { "src": "radovan-hr", "predicate": "translation-of", "dst": "hilarius-la",    "attrs": { "basis": "meaning-equivalence: cheerful/glad" } },
+
+    { "src": "muhammad-en","predicate": "transliteration-of","dst":"muhammad-ar",  "attrs": { "scheme": "DIN-31635" } },
+    { "src": "mohammed-en","predicate": "transliteration-of","dst":"muhammad-ar",  "attrs": { "scheme": "popular-anglophone" } },
+    { "src": "mohamad-en", "predicate": "transliteration-of","dst":"muhammad-ar",  "attrs": { "scheme": "levantine-popular" } },
+    { "src": "muhamed-bs", "predicate": "variant-of",     "dst": "muhammad-ar",    "attrs": { "note": "Bosnian orthographic adaptation" } },
+    { "src": "mehmet-tr",  "predicate": "phonetic-loan-of","dst":"muhammad-ar",    "attrs": { "note": "Ottoman-Turkish phonological reshape" } },
+    { "src": "mehmed-bs",  "predicate": "borrowed-from",  "dst": "mehmet-tr",      "attrs": { "channel": "Ottoman period" } },
+    { "src": "mamadou-wo", "predicate": "phonetic-loan-of","dst":"muhammad-ar",    "attrs": { "note": "West-African Sahel reshape" } },
+    { "src": "hamadi-sw",  "predicate": "hypocorism-of",  "dst": "muhammad-ar",    "attrs": { "note": "Swahili clipping" } },
+    { "src": "ahmad-ar",   "predicate": "cognate-of",     "dst": "muhammad-ar",    "attrs": { "shared_root": "ح م د" } },
+    { "src": "hamid-ar",   "predicate": "cognate-of",     "dst": "muhammad-ar",    "attrs": { "shared_root": "ح م د" } },
+    { "src": "mahmoud-ar", "predicate": "cognate-of",     "dst": "muhammad-ar",    "attrs": { "shared_root": "ح م د" } },
+    { "src": "muhammad-ar","predicate": "contains-element","dst": "etym-hmd-root", "attrs": { "form": "passive-participle stem II" } },
+    { "src": "ahmad-ar",   "predicate": "contains-element","dst": "etym-hmd-root", "attrs": {} },
+    { "src": "hamid-ar",   "predicate": "contains-element","dst": "etym-hmd-root", "attrs": {} },
+    { "src": "mahmoud-ar", "predicate": "contains-element","dst": "etym-hmd-root", "attrs": {} },
+    { "src": "muhammad-ar","predicate": "named-after",    "dst": "ref-prophet",    "attrs": { "kind": "religious-eponym", "confidence": 0.99 } },
+
+    { "src": "friedrich-de","predicate":"compound-of",    "dst": "elem-frid-ohg",  "attrs": { "order": 0 } },
+    { "src": "friedrich-de","predicate":"compound-of",    "dst": "elem-rihhi-ohg", "attrs": { "order": 1 } },
+    { "src": "elem-frid-ohg","predicate":"derived-from",  "dst": "etym-frithuz-pg","attrs": {} },
+    { "src": "elem-rihhi-ohg","predicate":"derived-from", "dst": "etym-rikijaz-pg","attrs": {} },
+
+    { "src": "fritz-de",   "predicate": "hypocorism-of",  "dst": "friedrich-de",   "attrs": {} },
+    { "src": "fred-en",    "predicate": "hypocorism-of",  "dst": "frederick-en",   "attrs": {} },
+    { "src": "frederick-en","predicate":"cognate-of",     "dst": "friedrich-de",   "attrs": {} },
+    { "src": "frederic-fr","predicate":"cognate-of",      "dst": "friedrich-de",   "attrs": {} },
+    { "src": "federico-it","predicate":"cognate-of",      "dst": "friedrich-de",   "attrs": {} },
+    { "src": "fridrih-ru", "predicate":"transliteration-of","dst":"friedrich-de",  "attrs": { "scheme": "GOST-7.79" } },
+    { "src": "frederika-de","predicate":"feminine-of",    "dst": "friedrich-de",   "attrs": {} },
+    { "src": "frederica-it","predicate":"feminine-of",    "dst": "federico-it",    "attrs": {} },
+    { "src": "frederick-en","predicate":"interlingual-equivalent-of","dst":"federico-it","attrs": {} },
+    { "src": "frederick-en","predicate":"interlingual-equivalent-of","dst":"frederic-fr","attrs": {} },
+    { "src": "friedrich-de","predicate":"named-after",    "dst": "ref-pope-fr",    "attrs": { "kind": "notable-bearer", "confidence": 0.5 } },
+
+    { "src": "mirko-hr",   "predicate": "translation-of", "dst": "friedrich-de",   "attrs": { "basis": "partial-meaning: shared 'peace' element via Slav. mir↔Gmc. frid" } },
+
+    { "src": "hiroshi-ja-hira", "predicate": "variant-of", "dst": "hiroshi-ja-kanji-kan", "attrs": { "note": "phonetic spelling" } },
+    { "src": "hiroshi-ja-kata", "predicate": "variant-of", "dst": "hiroshi-ja-kanji-kan", "attrs": { "register": "loanword/foreign-style" } },
+    { "src": "hiroshi-ja-kanji-koh","predicate":"variant-of","dst":"hiroshi-ja-kanji-kan","attrs": { "note": "alternative kanji writing, same reading" } },
+    { "src": "hiroshi-ja-kanji-hiro","predicate":"variant-of","dst":"hiroshi-ja-kanji-kan","attrs": { "note": "alternative kanji writing, same reading" } },
+    { "src": "hiroshi-rom","predicate":"transliteration-of","dst":"hiroshi-ja-hira","attrs": { "scheme": "Hepburn" } },
+    { "src": "hiro-rom",   "predicate":"contracted-from", "dst": "hiroshi-rom",    "attrs": {} },
+    { "src": "hiroko-rom", "predicate":"transliteration-of","dst":"hiroko-ja",     "attrs": { "scheme": "Hepburn" } },
+    { "src": "hiroko-ja",  "predicate":"feminine-of",     "dst": "hiroshi-ja-kanji-kan", "attrs": { "note": "shares hiro 'broad' element + feminine 子 suffix" } },
+    { "src": "hiroshi-ja-kanji-kan","predicate":"contains-element","dst":"elem-hiro-ja","attrs": {} },
+    { "src": "elem-hiro-ja","predicate":"meaning",        "dst": "concept-broad",  "attrs": {} },
+    { "src": "hiroshi-rom","predicate":"named-after",     "dst": "ref-mifune",     "attrs": { "kind": "notable-bearer", "confidence": 0.3 } },
+
+    { "src": "muhammad-en","predicate":"interlingual-equivalent-of","dst":"mehmet-tr","attrs": { "note": "treated as same person-name across border crossings" } },
+    { "src": "radovan-hr", "predicate":"interlingual-equivalent-of","dst":"radek-cz","attrs": { "note": "pragmatic equivalence in everyday translation" } }
+  ]
+}

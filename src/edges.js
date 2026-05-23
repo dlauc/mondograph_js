@@ -29,14 +29,27 @@ function drawArrowhead(ctx, x1, y1, x2, y2, color) {
   ctx.restore();
 }
 
+// Generate a deterministic visual offset for edge animations based on node names
+function getEdgeHash(s1, s2) {
+  let hash = 0;
+  const str = s1 + s2;
+  for (let i = 0; i < str.length; i++) {
+    hash = (hash << 5) - hash + str.charCodeAt(i);
+    hash |= 0;
+  }
+  return Math.abs(hash) / 1000;
+}
+
 /**
- * Draw all edges for the current frame.
+ * Draw all edges for the current frame, including custom relationships and crawling particles.
  * @param {CanvasRenderingContext2D} ctx
  * @param {Array<{from:string,to:string,type:string,weight?:number}>} edges
  * @param {Map<string,{x:number,y:number,opacity:number,visualRadius:number}>} nodeState
  * @param {object} theme  resolveTheme() output
  */
 export function drawEdges(ctx, edges, nodeState, theme) {
+  const now = Date.now();
+
   for (const edge of edges) {
     const from = nodeState.get(edge.from);
     const to   = nodeState.get(edge.to);
@@ -57,14 +70,35 @@ export function drawEdges(ctx, edges, nodeState, theme) {
     ctx.globalAlpha = alpha;
     ctx.strokeStyle = cfg.stroke;
     ctx.lineWidth   = cfg.width * weight;
-    ctx.setLineDash(cfg.dash);
+    ctx.setLineDash(cfg.dash ?? []);
     ctx.beginPath();
     ctx.moveTo(from.x, from.y);
     ctx.lineTo(ep.x, ep.y);
     ctx.stroke();
 
     if (cfg.arrow) drawArrowhead(ctx, from.x, from.y, ep.x, ep.y, cfg.stroke);
-
     ctx.restore();
+
+    // crawling light particle flow animation
+    if (cfg.animate && alpha > 0.05) {
+      const hashOffset = getEdgeHash(edge.from, edge.to);
+      const cycleMs = 2800; // time in ms for a full crawl across the line
+      const t = ((now / cycleMs) + hashOffset) % 1.0;
+
+      // coordinates of particle crawling from 'from' to 'to'
+      const px = from.x + t * (ep.x - from.x);
+      const py = from.y + t * (ep.y - from.y);
+
+      ctx.save();
+      ctx.globalAlpha = alpha;
+      ctx.beginPath();
+      const pRadius = (cfg.width * weight * 1.2) + 1.0;
+      ctx.arc(px, py, pRadius, 0, Math.PI * 2);
+      ctx.fillStyle = '#ffffff';
+      ctx.shadowColor = cfg.stroke;
+      ctx.shadowBlur = 6;
+      ctx.fill();
+      ctx.restore();
+    }
   }
 }

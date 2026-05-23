@@ -19,19 +19,24 @@ export function hitTest(px, py, nodes) {
 }
 
 /**
- * Compute hit radius for a node.
- * @param {string}  type      node type
+ * Compute hit radius for a node based on type, popularity, and center status.
+ * Supports both full node objects and legacy type string parameters.
+ * @param {object|string}  node      node data or type string
  * @param {boolean} isCenter
  * @param {boolean} isTouch
  * @returns {number}
  */
-export function hitRadius(type, isCenter, isTouch) {
+export function hitRadius(node, isCenter, isTouch) {
   let r;
+  const type = node && typeof node === 'object' ? node.type : (typeof node === 'string' ? node : 'text');
   if (isCenter)                    r = 38;
   else if (type === 'attestation') r = 8;
   else if (type === 'concept')     r = 18;
   else if (type === 'referent')    r = 20;
   else if (type === 'element')     r = 12;
   else                             r = 22;
-  return Math.max(r, MIN_HIT) + (isTouch ? TOUCH_EXTRA : 0);
+
+  const popularity = node && typeof node === 'object' && node.popularity != null ? node.popularity : 0.5;
+  const scaledR = r * (0.7 + 0.6 * popularity);
+  return Math.max(scaledR, MIN_HIT) + (isTouch ? TOUCH_EXTRA : 0);
 }

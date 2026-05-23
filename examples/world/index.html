@@ -3,43 +3,961 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Name Around the World — ThinkGraph</title>
+<title>Mondonomo Name Explorer — ThinkGraph</title>
 <style>
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-  body { background: #011838; color: #fff; font-family: "Noto Sans", sans-serif;
-         display: flex; flex-direction: column; height: 100vh; overflow: hidden; }
-  .bar { display: flex; align-items: center; gap: 8px; padding: 10px 16px;
-         border-bottom: 1px solid rgba(2,185,185,.15); flex-shrink: 0; }
-  .brand { color: #02b9b9; font-weight: 700; text-transform: uppercase;
-           letter-spacing: .06em; font-size: .9rem; }
-  #graph { flex: 1; }
+  
+  :root {
+    --bg-dark: #020f20;
+    --brand-teal: #02b9b9;
+    --brand-glow: rgba(2, 185, 185, 0.2);
+    --border-color: rgba(2, 185, 185, 0.18);
+    --glass-bg: rgba(2, 15, 32, 0.8);
+  }
+
+  body {
+    background: var(--bg-dark);
+    color: #fff;
+    font-family: "Outfit", "Noto Sans", sans-serif;
+    display: flex;
+    flex-direction: column;
+    height: 100vh;
+    overflow: hidden;
+  }
+
+  /* Top Navigation Bar */
+  .navbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 12px 24px;
+    background: rgba(2, 15, 32, 0.9);
+    border-bottom: 1px solid var(--border-color);
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+    backdrop-filter: blur(10px);
+    z-index: 10;
+    flex-shrink: 0;
+  }
+
+  .brand-group {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .brand-logo {
+    width: 24px;
+    height: 24px;
+    border-radius: 6px;
+    background: linear-gradient(135deg, var(--brand-teal), #00d2ff);
+    box-shadow: 0 0 10px var(--brand-teal);
+  }
+
+  .brand {
+    color: #fff;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: .08em;
+    font-size: 1.05rem;
+    background: linear-gradient(to right, #fff, #a8e0de);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+
+  .brand-tag {
+    color: rgba(255, 255, 255, 0.45);
+    font-size: .8rem;
+    letter-spacing: 0.05em;
+    border-left: 1px solid rgba(255, 255, 255, 0.15);
+    padding-left: 12px;
+    margin-left: 4px;
+  }
+
+  .search-container {
+    position: relative;
+    display: flex;
+    align-items: center;
+    width: 320px;
+  }
+
+  .search-input {
+    width: 100%;
+    height: 2.3rem;
+    border: 1px solid var(--border-color);
+    border-radius: 20px;
+    background: rgba(255, 255, 255, 0.04);
+    color: #fff;
+    font-size: .85rem;
+    padding: 0 16px 0 36px;
+    outline: 0;
+    transition: all 0.3s ease;
+  }
+
+  .search-input:focus {
+    border-color: var(--brand-teal);
+    background: rgba(255, 255, 255, 0.08);
+    box-shadow: 0 0 12px var(--brand-glow);
+  }
+
+  .search-icon {
+    position: absolute;
+    left: 14px;
+    color: rgba(2, 185, 185, 0.6);
+    pointer-events: none;
+    font-size: 0.9rem;
+  }
+
+  /* Main Workspace Layout */
+  .workspace {
+    display: flex;
+    flex: 1;
+    overflow: hidden;
+    position: relative;
+  }
+
+  /* Left Side: Legend & Controls (Glass panel) */
+  .sidebar-left {
+    width: 280px;
+    background: var(--glass-bg);
+    border-right: 1px solid var(--border-color);
+    backdrop-filter: blur(12px);
+    display: flex;
+    flex-direction: column;
+    padding: 20px;
+    gap: 20px;
+    z-index: 5;
+    overflow-y: auto;
+  }
+
+  /* Right Side: Detailed Profile (Glass panel) */
+  .sidebar-right {
+    width: 320px;
+    background: var(--glass-bg);
+    border-left: 1px solid var(--border-color);
+    backdrop-filter: blur(12px);
+    display: flex;
+    flex-direction: column;
+    padding: 24px;
+    gap: 24px;
+    z-index: 5;
+    overflow-y: auto;
+  }
+
+  /* Canvas Graph Center */
+  #graph {
+    flex: 1;
+    height: 100%;
+    position: relative;
+  }
+
+  /* UI Modules and Details Card Styling */
+  .card-section {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .section-title {
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--brand-teal);
+    font-weight: 700;
+    border-bottom: 1px solid rgba(2, 185, 185, 0.12);
+    padding-bottom: 6px;
+    margin-bottom: 4px;
+  }
+
+  /* Legend Indicators */
+  .legend-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 0.78rem;
+    color: rgba(255, 255, 255, 0.75);
+    margin-bottom: 6px;
+  }
+
+  .indicator-node {
+    width: 14px;
+    height: 14px;
+    border-radius: 50%;
+    border: 1.5px solid #888;
+    background: #020f20;
+    flex-shrink: 0;
+  }
+  .ind-given-m { border-color: #38bdf8; box-shadow: 0 0 5px rgba(56, 189, 248, 0.4); }
+  .ind-given-f { border-color: #fb7185; box-shadow: 0 0 5px rgba(251, 113, 133, 0.4); }
+  .ind-given-u { border-color: #c084fc; box-shadow: 0 0 5px rgba(192, 132, 252, 0.4); }
+  .ind-surname { border-radius: 4px; width: 22px; height: 12px; border-color: #f59e0b; }
+  .ind-element { border-radius: 6px; width: 22px; height: 10px; border-color: #cbd5e1; opacity: 0.7; }
+  .ind-concept { border-radius: 50%; border-style: dashed; border-color: #eab308; }
+
+  .indicator-edge {
+    width: 24px;
+    height: 2px;
+    background: #888;
+    position: relative;
+    flex-shrink: 0;
+  }
+  .indicator-edge::after {
+    content: '';
+    position: absolute;
+    right: 0;
+    top: -2px;
+    width: 0;
+    height: 0;
+    border-style: solid;
+    border-width: 3px 0 3px 5px;
+    border-color: transparent transparent transparent #888;
+    display: none;
+  }
+  .edge-trans { background: #00d2ff; }
+  .edge-cognate { background: transparent; border-top: 1.5px dashed #a855f7; }
+  .edge-variant { background: transparent; border-top: 1.8px dashed #ec4899; }
+  .edge-derive { background: #02b9b9; }
+  .edge-derive::after { display: block; border-left-color: #02b9b9; }
+  .edge-related { background: transparent; border-top: 1.2px dotted #38bdf8; }
+
+  .anchor-btn {
+    background: rgba(2, 185, 185, 0.05);
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    color: rgba(255,255,255,0.8);
+    font-family: inherit;
+    font-size: 0.8rem;
+    padding: 8px 12px;
+    text-align: left;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    width: 100%;
+  }
+  .anchor-btn:hover {
+    background: rgba(2, 185, 185, 0.12);
+    border-color: var(--brand-teal);
+    color: #fff;
+  }
+
+  /* Profile Details Panel */
+  .profile-header {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    align-items: center;
+    text-align: center;
+  }
+
+  .profile-name {
+    font-size: 1.8rem;
+    font-weight: 800;
+    color: #fff;
+    letter-spacing: -0.02em;
+    text-shadow: 0 0 15px rgba(255, 255, 255, 0.15);
+  }
+
+  .gender-badge {
+    padding: 3px 10px;
+    border-radius: 12px;
+    font-size: 0.68rem;
+    font-weight: 700;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    display: inline-block;
+    box-shadow: 0 0 8px rgba(255,255,255,0.05);
+  }
+  .gender-m { background: rgba(56, 189, 248, 0.15); color: #38bdf8; border: 1px solid rgba(56, 189, 248, 0.3); }
+  .gender-f { background: rgba(251, 113, 133, 0.15); color: #fb7185; border: 1px solid rgba(251, 113, 133, 0.3); }
+  .gender-u { background: rgba(192, 132, 252, 0.15); color: #c084fc; border: 1px solid rgba(192, 132, 252, 0.3); }
+  .gender-none { background: rgba(255, 255, 255, 0.05); color: rgba(255, 255, 255, 0.6); border: 1px solid rgba(255, 255, 255, 0.1); }
+
+  .profile-stat-row {
+    display: flex;
+    justify-content: space-between;
+    font-size: 0.8rem;
+    padding: 8px 0;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+  }
+
+  .stat-label { color: rgba(255, 255, 255, 0.45); }
+  .stat-value { color: #fff; font-weight: 600; }
+
+  /* Popularity Gauge Progress Bar */
+  .popularity-gauge {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    margin-top: 6px;
+  }
+
+  .gauge-track {
+    height: 8px;
+    border-radius: 4px;
+    background: rgba(255, 255, 255, 0.08);
+    width: 100%;
+    overflow: hidden;
+    position: relative;
+    border: 1px solid rgba(2, 185, 185, 0.1);
+  }
+
+  .gauge-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--brand-teal), #00d2ff);
+    box-shadow: 0 0 8px var(--brand-teal);
+    width: 50%;
+    transition: width 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+
+  /* Flags List badges */
+  .propensity-flags {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+    margin-top: 4px;
+  }
+
+  .flag-badge-pill {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    background: rgba(255, 255, 255, 0.04);
+    border: 1px solid rgba(255, 255, 255, 0.06);
+    padding: 4px 8px;
+    border-radius: 12px;
+    font-size: 0.72rem;
+    font-weight: 500;
+  }
+
+  .flag-badge-pill img {
+    width: 14px;
+    height: 14px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 1px solid rgba(255, 255, 255, 0.15);
+  }
+
+  .note-box {
+    background: rgba(2, 185, 185, 0.05);
+    border-left: 3px solid var(--brand-teal);
+    padding: 12px;
+    font-size: 0.78rem;
+    line-height: 1.5;
+    color: rgba(255, 255, 255, 0.8);
+    border-radius: 0 6px 6px 0;
+  }
+
+  .tip-box {
+    font-size: 0.72rem;
+    color: rgba(255, 255, 255, 0.35);
+    text-align: center;
+    line-height: 1.4;
+    padding: 12px;
+    border: 1px dashed rgba(255, 255, 255, 0.08);
+    border-radius: 8px;
+  }
 </style>
-<link href="https://fonts.googleapis.com/css2?family=Noto+Sans:wght@400;500;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&family=Noto+Sans:wght@400;500;700&display=swap" rel="stylesheet">
 </head>
 <body>
-<div class="bar">
-  <span class="brand">Mondonomo</span>
-  <span style="color:rgba(255,255,255,.2)">·</span>
-  <span style="color:rgba(255,255,255,.4);font-size:.8rem">Name Around the World</span>
+
+<!-- Navigation Bar -->
+<div class="navbar">
+  <div class="brand-group">
+    <div class="brand-logo"></div>
+    <span class="brand">Mondonomo</span>
+    <span class="brand-tag">Global Name Explorer</span>
+  </div>
+  
+  <div class="search-container">
+    <span class="search-icon">🔍</span>
+    <input id="search" type="text" class="search-input" placeholder="Search etymological network..." list="names-list" autocomplete="off">
+    <datalist id="names-list">
+      <option value="Radovan">
+      <option value="Muhammad">
+      <option value="Friedrich">
+      <option value="Hiroshi">
+      <option value="Mehmet">
+      <option value="Frederick">
+    </datalist>
+  </div>
 </div>
-<div id="graph"></div>
+
+<!-- Main Interactive Workspace -->
+<div class="workspace">
+  <!-- Left Panel: Legends and Legend details -->
+  <div class="sidebar-left">
+    <!-- Network Dataset Selector -->
+    <div class="card-section">
+      <span class="section-title">Network Database</span>
+      <select id="dataset-selector" style="
+        background: rgba(255, 255, 255, 0.05);
+        color: #fff;
+        border: 1px solid var(--border-color);
+        border-radius: 8px;
+        padding: 8px 12px;
+        font-family: inherit;
+        font-size: 0.8rem;
+        outline: none;
+        cursor: pointer;
+        width: 100%;
+        transition: all 0.3s ease;
+      " onfocus="this.style.borderColor='var(--brand-teal)'; this.style.boxShadow='0 0 10px var(--brand-glow)'" onblur="this.style.borderColor='var(--border-color)'; this.style.boxShadow='none'">
+        <option value="global" selected style="background: var(--bg-dark); color: #fff;">Global Name Network (90+ Nodes)</option>
+        <option value="curated" style="background: var(--bg-dark); color: #fff;">Curated Demo (Alexander & Co.)</option>
+      </select>
+    </div>
+
+    <!-- Anchor Names quick-jump -->
+    <div class="card-section">
+      <span class="section-title">Explore Anchors</span>
+      <button class="anchor-btn" data-id="radovan-hr">🇭🇷 Radovan <span style="opacity:.5;font-size:.7rem">· Slavic</span></button>
+      <button class="anchor-btn" data-id="muhammad-ar">☪️ Muhammad <span style="opacity:.5;font-size:.7rem">· Arabic</span></button>
+      <button class="anchor-btn" data-id="friedrich-de">🇩🇪 Friedrich <span style="opacity:.5;font-size:.7rem">· Germanic</span></button>
+      <button class="anchor-btn" data-id="hiroshi-ja-kanji-kan">🇯🇵 Hiroshi <span style="opacity:.5;font-size:.7rem">· Japanese</span></button>
+    </div>
+
+    <div class="card-section">
+      <span class="section-title">Name Types</span>
+      <div class="legend-item">
+        <div class="indicator-node ind-given-m"></div>
+        <span>Given Name (Male Glow)</span>
+      </div>
+      <div class="legend-item">
+        <div class="indicator-node ind-given-f"></div>
+        <span>Given Name (Female Glow)</span>
+      </div>
+      <div class="legend-item">
+        <div class="indicator-node ind-given-u"></div>
+        <span>Given Name (Unisex Glow)</span>
+      </div>
+      <div class="legend-item">
+        <div class="indicator-node ind-surname"></div>
+        <span>Surname Capsule Card</span>
+      </div>
+      <div class="legend-item">
+        <div class="indicator-node ind-element"></div>
+        <span>Etymological Root Element</span>
+      </div>
+      <div class="legend-item">
+        <div class="indicator-node ind-concept"></div>
+        <span>Semantic Concept</span>
+      </div>
+    </div>
+    
+    <div class="card-section">
+      <span class="section-title">Relationships</span>
+      <div class="legend-item">
+        <div class="indicator-edge edge-trans"></div>
+        <span>Transliteration</span>
+      </div>
+      <div class="legend-item">
+        <div class="indicator-edge edge-cognate"></div>
+        <span>Cognate (Shared Root)</span>
+      </div>
+      <div class="legend-item">
+        <div class="indicator-edge edge-variant"></div>
+        <span>Spelling Variant / Dim.</span>
+      </div>
+      <div class="legend-item">
+        <div class="indicator-edge edge-derive"></div>
+        <span>Derived From (Root)</span>
+      </div>
+      <div class="legend-item">
+        <div class="indicator-edge edge-related"></div>
+        <span>Related Family/Patronymic</span>
+      </div>
+    </div>
+
+    <div class="card-section" style="margin-top:auto;">
+      <div class="tip-box">
+        💡 <strong>Interactive Particles</strong><br>
+        Glowing energy pulses show the historical flow of names across languages.
+      </div>
+    </div>
+  </div>
+
+  <!-- Center Canvas Area -->
+  <div id="graph"></div>
+
+  <!-- Right Panel: Profile Detail Panel -->
+  <div class="sidebar-right">
+    <div id="profile-container" class="card-section" style="display:flex; flex-direction:column; gap:20px;">
+      <!-- Main Profile Title & Gender -->
+      <div class="profile-header">
+        <h2 id="name-title" class="profile-name">-</h2>
+        <span id="gender-badge" class="gender-badge gender-none">-</span>
+      </div>
+      
+      <!-- Base stats -->
+      <div class="card-section">
+        <span class="section-title">Classifications</span>
+        <div class="profile-stat-row">
+          <span class="stat-label">Classification</span>
+          <span id="val-type" class="stat-value">-</span>
+        </div>
+        <div class="profile-stat-row">
+          <span class="stat-label">Language Origin</span>
+          <span id="val-lang" class="stat-value">-</span>
+        </div>
+      </div>
+
+      <!-- Popularity progress bar -->
+      <div class="card-section">
+        <span class="section-title">Global Popularity</span>
+        <div class="popularity-gauge">
+          <div style="display:flex; justify-content:space-between; font-size:0.75rem; color:rgba(255,255,255,0.6)">
+            <span>Relative Weight</span>
+            <span id="val-pop-pct">-%</span>
+          </div>
+          <div class="gauge-track">
+            <div id="val-pop-fill" class="gauge-fill" style="width: 0%;"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Countries Map Propensity -->
+      <div class="card-section" id="section-propensity">
+        <span class="section-title">Regional Propensity</span>
+        <div id="val-flags" class="propensity-flags">
+          <!-- dynamically inserted flags -->
+        </div>
+      </div>
+
+      <!-- Descriptions box -->
+      <div class="card-section">
+        <span class="section-title">Etymology Note</span>
+        <div id="val-note" class="note-box">
+          Click a name node to view its etymology and connections.
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
 
 <script type="module">
 import { ThinkGraph } from '/dist/thinkgraph.esm.js';
-import { WORLD_DATA  } from './data.js';
+import { WORLD_DATA } from './data.js';
+
+// Autocomplete database search mapping
+const SEARCH_MAP = {
+  'alexander': 'alexander',
+  'alejandro': 'alejandro',
+  'alexandre': 'alexandre',
+  'alex': 'alex',
+  'sasha': 'sasha',
+  'alexander (surname)': 'alexander_surname'
+};
+
+let activeDataset = 'global'; // 'curated' or 'global'
+let globalGraphData = null;
+let currentSearchMap = { ...SEARCH_MAP };
+
+// English search aliases for non-Latin anchor nodes
+const ANCHOR_ALIASES = {
+  'radovan':   'radovan-hr',
+  'muhammad':  'muhammad-ar',
+  'mohammed':  'mohammed-en',
+  'mehmet':    'mehmet-tr',
+  'friedrich': 'friedrich-de',
+  'frederick': 'frederick-en',
+  'fritz':     'fritz-de',
+  'hiroshi':   'hiroshi-rom',
+  'hiro':      'hiro-rom',
+};
 
 const graph = new ThinkGraph({
   container: '#graph',
   getNeighbors: async (id) => {
-    const baseName = id.split('::')[0];
-    return WORLD_DATA[baseName] ?? { nodes: [], edges: [] };
+    if (activeDataset === 'global') {
+      if (!globalGraphData) await loadGlobalDataset();
+      return getGlobalNeighbors(id);
+    } else {
+      const baseName = id.toLowerCase();
+      return WORLD_DATA[baseName] ?? { nodes: [], edges: [] };
+    }
   },
-  renderTooltip: (node) => node.type === 'flag'
-    ? `<strong>${node.label}</strong><div style="font-size:10px;opacity:.5">popular in</div>`
-    : `<strong>${node.label}</strong>`,
+  onSelect: (node) => {
+    updateProfilePanel(node);
+  },
+  renderTooltip: (node) => {
+    const pop = node.popularity != null ? Math.round(node.popularity * 100) : 50;
+    const typeLabel = node.type.toUpperCase();
+    const genderLabel = node.gender ? ` (${node.gender})` : '';
+    return `<strong>${node.label}</strong>
+            <div style="font-size:10px;opacity:.65;margin-top:2px">${node.lang ?? 'UNKNOWN'} · ${typeLabel}${genderLabel}</div>
+            <div style="font-size:9.5px;color:#02b9b9;margin-top:4px">Popularity Weight: ${pop}%</div>`;
+  }
 });
 
-graph.setCenter('mary');
+// Load the dynamic global name network dataset (ui_sample_network.json)
+async function loadGlobalDataset() {
+  if (globalGraphData) return;
+  
+  try {
+    const res = await fetch('../ui_sample_network.json');
+    const rawData = await res.json();
+    
+    // Transform all nodes in the raw data to ThinkGraph format
+    const transformedNodes = rawData.nodes.map(node => {
+      // Determine type
+      let type = 'text';
+      if (node.attrs?.form_kind === 'surname' || node.attrs?.kind === 'surname') {
+        type = 'surname';
+      } else if (node.type === 'form') {
+        type = 'given';
+      } else if (node.type === 'element') {
+        type = 'element';
+      } else if (node.type === 'concept') {
+        type = 'concept';
+      } else if (node.type === 'referent') {
+        type = 'referent';
+      } else if (node.type === 'etymon') {
+        type = 'etymon';
+      }
+      
+      // Label
+      const label = node.form || node.attrs?.label_en || node.attrs?.meaning_en || node.id;
+      
+      // Gender
+      const gender = node.attrs?.gender?.toUpperCase() || null;
+      
+      // Lang
+      const LANG_MAP = {
+        'hrv': 'Croatian',
+        'srp': 'Serbian',
+        'bul': 'Bulgarian',
+        'mkd': 'Macedonian',
+        'ces': 'Czech',
+        'slk': 'Slovak',
+        'pol': 'Polish',
+        'sla-pro': 'Proto-Slavic',
+        'lat': 'Latin',
+        'ara': 'Arabic',
+        'eng': 'English',
+        'tur': 'Turkish',
+        'bos': 'Bosnian',
+        'wol': 'Wolof',
+        'swa': 'Swahili',
+        'deu': 'German',
+        'goh': 'Old High German',
+        'gem-pro': 'Proto-Germanic',
+        'fra': 'French',
+        'ita': 'Italian',
+        'rus': 'Russian',
+        'jpn': 'Japanese',
+        'hira': 'Hiragana',
+        'kana': 'Katakana'
+      };
+      const lang = LANG_MAP[node.lang] || node.lang || 'Unknown';
+      
+      // Popularity — prefer world total, otherwise sum all countries
+      let popularity = 0.5;
+      let totalBearers = 0;
+      if (node.attrs?.popularity) {
+        if (node.attrs.popularity.world?.bearers) {
+          totalBearers = node.attrs.popularity.world.bearers;
+        } else {
+          for (const c in node.attrs.popularity) {
+            const p = node.attrs.popularity[c];
+            if (p && typeof p.bearers === 'number') totalBearers += p.bearers;
+          }
+        }
+      }
+      if (totalBearers > 0) {
+        const logVal = Math.log10(totalBearers);
+        popularity = Math.min(1.0, Math.max(0.1, 0.1 + 0.9 * (logVal / 8.5)));
+      } else if (node.type === 'etymon' || node.type === 'element' || node.type === 'concept') {
+        popularity = 0.3;
+      }
+
+      // Flags (kept for curated dataset fallback)
+      let flags = [];
+      if (node.attrs?.popularity) {
+        flags = Object.keys(node.attrs.popularity)
+          .map(c => c.toUpperCase())
+          .filter(c => c !== 'WORLD');
+      }
+      
+      // Meta / note
+      const meta = {};
+      let noteParts = [];
+      if (node.attrs?.meaning_en) {
+        noteParts.push(`Meaning: "${node.attrs.meaning_en}"`);
+      }
+      if (node.attrs?.kanji_gloss_en) {
+        noteParts.push(`Kanji: "${node.attrs.kanji_gloss_en}"`);
+      }
+      if (node.attrs?.register) {
+        noteParts.push(`Register: ${node.attrs.register}`);
+      }
+      if (node.ipa) {
+        noteParts.push(`IPA: /${node.ipa}/`);
+      }
+      if (node.attrs?.note) {
+        noteParts.push(node.attrs.note);
+      }
+      meta.note = noteParts.join(' · ') || `${label} is an etymological component in the name database.`;
+      
+      return {
+        id: node.id,
+        label,
+        type,
+        gender,
+        lang,
+        popularity,
+        flags,
+        ipa: node.ipa || null,
+        script: node.script || null,
+        countriesData: node.attrs?.popularity || null,
+        meta
+      };
+    });
+    
+    // Transform all edges
+    const transformedEdges = rawData.edges.map(edge => {
+      // Map relationship types
+      let type = 'related_name';
+      const pred = edge.predicate;
+      if (pred === 'transliteration-of') type = 'transliteration';
+      else if (pred === 'cognate-of') type = 'cognate_of';
+      else if (pred === 'variant-of') type = 'variant_of';
+      else if (pred === 'derived-from') type = 'derives_from';
+      else if (pred === 'patronymic-of') type = 'related_name';
+      else if (pred === 'hypocorism-of') type = 'variant_of';
+      else if (pred === 'compound-of') type = 'derives_from';
+      else if (pred === 'meaning') type = 'derives_from';
+      else if (pred === 'named-after') type = 'related_name';
+      else if (pred === 'translation-of') type = 'cognate_of';
+      else if (pred === 'interlingual-equivalent-of') type = 'cognate_of';
+      else if (pred === 'phonetic-loan-of') type = 'derives_from';
+      else if (pred === 'borrowed-from') type = 'derives_from';
+      else if (pred === 'contains-element') type = 'derives_from';
+      else if (pred === 'feminine-of') type = 'variant_of';
+      else if (pred === 'masculine-of') type = 'variant_of';
+      
+      return {
+        from: edge.src,
+        to: edge.dst,
+        type,
+        weight: edge.attrs?.confidence || 0.8
+      };
+    });
+    
+    globalGraphData = {
+      nodes: transformedNodes,
+      edges: transformedEdges
+    };
+  } catch (error) {
+    console.error("Failed to load ui_sample_network.json", error);
+  }
+}
+
+// Extract neighbors from the global name network dataset
+function getGlobalNeighbors(id) {
+  if (!globalGraphData) return { nodes: [], edges: [] };
+  
+  const targetNode = globalGraphData.nodes.find(n => n.id.toLowerCase() === id.toLowerCase());
+  if (!targetNode) return { nodes: [], edges: [] };
+  
+  // Find all edges connected to targetNode
+  const connectedEdges = globalGraphData.edges.filter(e => 
+    e.from.toLowerCase() === id.toLowerCase() || e.to.toLowerCase() === id.toLowerCase()
+  );
+  
+  // Find all nodes connected by those edges
+  const neighborIds = new Set();
+  neighborIds.add(targetNode.id.toLowerCase());
+  
+  connectedEdges.forEach(e => {
+    neighborIds.add(e.from.toLowerCase());
+    neighborIds.add(e.to.toLowerCase());
+  });
+  
+  const connectedNodes = globalGraphData.nodes.filter(n => 
+    neighborIds.has(n.id.toLowerCase())
+  );
+  
+  return {
+    nodes: connectedNodes,
+    edges: connectedEdges
+  };
+}
+
+// Dynamically populate search bar autocomplete
+function populateAutocomplete(nodes, isGlobal) {
+  const datalist = document.getElementById('names-list');
+  datalist.innerHTML = '';
+  
+  if (isGlobal) {
+    // Populate with all forms / names from the JSON
+    nodes.forEach(node => {
+      if (node.type === 'given' || node.type === 'surname') {
+        const option = document.createElement('option');
+        option.value = node.label;
+        datalist.appendChild(option);
+      }
+    });
+  } else {
+    // Curated list
+    const curatedNames = ['Alexander', 'Alejandro', 'Alexandre', 'Alex', 'Sasha', 'Alexander (Surname)'];
+    curatedNames.forEach(name => {
+      const option = document.createElement('option');
+      option.value = name;
+      datalist.appendChild(option);
+    });
+  }
+}
+
+// Dynamically update active search query mappings
+function updateSearchMap(nodes, isGlobal) {
+  currentSearchMap = {};
+  if (isGlobal) {
+    nodes.forEach(node => {
+      if (node.type === 'given' || node.type === 'surname') {
+        currentSearchMap[node.label.toLowerCase()] = node.id;
+      }
+    });
+    Object.assign(currentSearchMap, ANCHOR_ALIASES);
+  } else {
+    Object.keys(SEARCH_MAP).forEach(k => {
+      currentSearchMap[k] = SEARCH_MAP[k];
+    });
+  }
+}
+
+// Update detail profile panel
+function updateProfilePanel(node) {
+  if (!node) return;
+  
+  // Name
+  document.getElementById('name-title').textContent = node.label;
+  
+  // Type
+  let displayType = node.type.charAt(0).toUpperCase() + node.type.slice(1);
+  if (node.type === 'given') displayType = 'Given Name';
+  if (node.type === 'surname') displayType = 'Surname';
+  if (node.type === 'etymon') displayType = 'Etymological Root';
+  if (node.type === 'element') displayType = 'Root Element';
+  if (node.type === 'concept') displayType = 'Semantic Concept';
+  if (node.type === 'referent') displayType = 'Notable Referent';
+  document.getElementById('val-type').textContent = displayType;
+  
+  // Language
+  document.getElementById('val-lang').textContent = node.lang || 'N/A';
+  
+  // Gender
+  const genderEl = document.getElementById('gender-badge');
+  genderEl.className = 'gender-badge'; // reset
+  if (node.gender === 'M') {
+    genderEl.textContent = '♂ Male';
+    genderEl.classList.add('gender-m');
+  } else if (node.gender === 'F') {
+    genderEl.textContent = '♀ Female';
+    genderEl.classList.add('gender-f');
+  } else if (node.gender === 'U') {
+    genderEl.textContent = '⚦ Unisex';
+    genderEl.classList.add('gender-u');
+  } else {
+    genderEl.textContent = 'Undefined';
+    genderEl.classList.add('gender-none');
+  }
+  
+  // Popularity Gauge
+  const popVal = node.popularity != null ? node.popularity : 0.5;
+  const popPct = Math.round(popVal * 100);
+  document.getElementById('val-pop-pct').textContent = `${popPct}%`;
+  document.getElementById('val-pop-fill').style.width = `${popPct}%`;
+  
+  // Flags Propensity List
+  const flagsContainer = document.getElementById('val-flags');
+  flagsContainer.innerHTML = '';
+  const countryList = node.flags || node.countries || [];
+  
+  if (countryList.length > 0) {
+    document.getElementById('section-propensity').style.display = 'flex';
+    countryList.forEach(iso => {
+      const pill = document.createElement('div');
+      pill.className = 'flag-badge-pill';
+      
+      const flagImg = document.createElement('img');
+      flagImg.src = `https://flagcdn.com/w40/${iso.toLowerCase()}.png`;
+      flagImg.alt = iso;
+      
+      const label = document.createElement('span');
+      label.textContent = iso.toUpperCase();
+      
+      pill.appendChild(flagImg);
+      pill.appendChild(label);
+      flagsContainer.appendChild(pill);
+    });
+  } else {
+    document.getElementById('section-propensity').style.display = 'none';
+  }
+  
+  // Note / Etymology Description
+  const noteText = node.meta?.note || `${node.label} is connected in this network via ${node.lang || 'historical'} roots.`;
+  document.getElementById('val-note').textContent = noteText;
+}
+
+// Initial load — default to the global JSON dataset
+(async () => {
+  await loadGlobalDataset();
+  updateSearchMap(globalGraphData.nodes, true);
+  populateAutocomplete(globalGraphData.nodes, true);
+  graph.setCenter('radovan-hr');
+})();
+
+// Dataset switching listener
+const datasetSelector = document.getElementById('dataset-selector');
+datasetSelector.addEventListener('change', async () => {
+  activeDataset = datasetSelector.value;
+  if (activeDataset === 'global') {
+    await loadGlobalDataset();
+    updateSearchMap(globalGraphData.nodes, true);
+    populateAutocomplete(globalGraphData.nodes, true);
+    graph.setCenter('radovan-hr');
+  } else {
+    updateSearchMap(null, false);
+    populateAutocomplete(null, false);
+    graph.setCenter('alexander');
+  }
+});
+
+// Anchor button quick-jump
+document.querySelectorAll('.anchor-btn').forEach(btn => {
+  btn.addEventListener('click', async () => {
+    if (activeDataset !== 'global') {
+      datasetSelector.value = 'global';
+      activeDataset = 'global';
+      await loadGlobalDataset();
+      updateSearchMap(globalGraphData.nodes, true);
+      populateAutocomplete(globalGraphData.nodes, true);
+    }
+    graph.setCenter(btn.dataset.id);
+  });
+});
+
+// Search navigation hook
+const searchInput = document.getElementById('search');
+searchInput.addEventListener('input', () => {
+  const query = searchInput.value.trim().toLowerCase();
+  const targetId = currentSearchMap[query];
+  if (targetId) {
+    graph.setCenter(targetId);
+    searchInput.value = ''; // clear search after centering
+    searchInput.blur();
+  }
+});
+searchInput.addEventListener('keydown', (e) => {
+  if (e.key === 'Enter') {
+    const query = searchInput.value.trim().toLowerCase();
+    const targetId = currentSearchMap[query];
+    if (targetId) {
+      graph.setCenter(targetId);
+      searchInput.value = '';
+      searchInput.blur();
+    }
+  }
+});
 </script>
 </body>
 </html>

@@ -4,14 +4,19 @@ import { drawNode  }   from './renderers/text.js';
 import { drawFlagNode }  from './renderers/flag.js';
 import { drawImageNode } from './renderers/image.js';
 
-/** Visual radius used for edge clipping (not hit-testing). */
-function visualRadius(type, isCenter) {
-  if (isCenter)               return 38;
-  if (type === 'attestation') return 8;
-  if (type === 'concept')     return 18;
-  if (type === 'referent')    return 20;
-  if (type === 'element')     return 12;
-  return 22;
+/** Visual radius used for edge clipping (not hit-testing). Scales with popularity. */
+export function visualRadius(node, isCenter) {
+  let base;
+  const type = node ? node.type : 'text';
+  if (isCenter)                    base = 38;
+  else if (type === 'attestation') base = 8;
+  else if (type === 'concept')     base = 18;
+  else if (type === 'referent')    base = 20;
+  else if (type === 'element')     base = 12;
+  else                             base = 22;
+
+  const popularity = node && node.popularity != null ? node.popularity : 0.5;
+  return base * (0.7 + 0.6 * popularity);
 }
 
 export class Renderer {
@@ -67,6 +72,7 @@ export class Renderer {
   start() {
     if (this._rafId != null) return;
     const loop = () => {
+      this._applyIdleNoise();
       tickSprings(this.springNodes, this.theme.spring, this.theme.opacitySpring);
       // Prune fully-faded departed nodes to prevent unbounded Map growth
       for (const [id, s] of this.springNodes) {
@@ -104,7 +110,7 @@ export class Renderer {
       nodeState.set(n.id, {
         x: s.x, y: s.y,
         opacity:      s.opacity,
-        visualRadius: visualRadius(n.type, n.id === this.centerId),
+        visualRadius: visualRadius(n, n.id === this.centerId),
       });
     }
 
@@ -177,7 +183,7 @@ export class Renderer {
     ctx.lineWidth   = 2;
     ctx.setLineDash([]);
     ctx.beginPath();
-    ctx.arc(s.x, s.y, visualRadius(node.type, false) + 6, 0, Math.PI * 2);
+    ctx.arc(s.x, s.y, visualRadius(node, false) + 6, 0, Math.PI * 2);
     ctx.stroke();
     ctx.restore();
   }
@@ -194,7 +200,7 @@ export class Renderer {
     ctx.lineWidth   = 2;
     ctx.setLineDash([3, 3]);
     ctx.beginPath();
-    ctx.arc(s.x, s.y, visualRadius(node.type, false) + 8, 0, Math.PI * 2);
+    ctx.arc(s.x, s.y, visualRadius(node, false) + 8, 0, Math.PI * 2);
     ctx.stroke();
     ctx.restore();
   }
@@ -230,6 +236,18 @@ export class Renderer {
     ctx.closePath();
     ctx.fill();
     ctx.restore();
+  }
+
+  // Inject a tiny random impulse each frame so settled nodes subtly drift.
+  // The spring K and damping naturally bound the amplitude; centre node is excluded.
+  _applyIdleNoise() {
+    const amp = this.theme.spring.idleNoise ?? 0;
+    if (amp === 0) return;
+    for (const [id, s] of this.springNodes) {
+      if (id === this.centerId || s.targetOpacity === 0) continue;
+      s.vx += (Math.random() - 0.5) * 2 * amp;
+      s.vy += (Math.random() - 0.5) * 2 * amp;
+    }
   }
 
   destroy() {

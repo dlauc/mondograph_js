@@ -136,7 +136,7 @@ export class ThinkGraph {
       const s = this._renderer.springNodes.get(n.id);
       if (!s) return null;
       return { id: n.id, x: s.x, y: s.y,
-               hitRadius: hitRadius(n.type, n.id === this._centerId, this._isTouch) };
+               hitRadius: hitRadius(n, n.id === this._centerId, this._isTouch) };
     }).filter(Boolean);
   }
 
