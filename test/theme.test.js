@@ -46,3 +46,20 @@ test('edgeTypes._fallback exists for unknown edge type', () => {
   assert.ok(t.edgeTypes._fallback);
   assert.equal(t.edgeTypes._fallback.stroke, '#64748b');
 });
+
+test('resolveTheme("editorialLight") returns the light preset', () => {
+  const t = resolveTheme('editorialLight');
+  assert.equal(t.background, '#fbfaf8');
+  assert.equal(t.nodeFill, '#ffffff');
+  assert.equal(t.nodeLabel, '#22202b');
+  assert.equal(t.spring.idleNoise, 0);          // no random jitter
+  assert.ok(t.float && t.float.amp > 0);        // deterministic float instead
+  assert.equal(langColor(t, 'English'), '#2563eb');
+});
+
+test('editorialLight does not mutate the mondonomo preset', () => {
+  const ed = resolveTheme('editorialLight');
+  ed.background = 'mutated';
+  assert.equal(resolveTheme('mondonomo').background, '#020f20');
+  assert.equal(resolveTheme('editorialLight').background, '#fbfaf8');
+});

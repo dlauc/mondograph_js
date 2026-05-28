@@ -94,7 +94,7 @@ export function drawEdges(ctx, edges, nodeState, theme) {
       ctx.beginPath();
       const pRadius = (cfg.width * weight * 1.2) + 1.0;
       ctx.arc(px, py, pRadius, 0, Math.PI * 2);
-      ctx.fillStyle = '#ffffff';
+      ctx.fillStyle = theme.edgeParticle ?? cfg.stroke;
       ctx.shadowColor = cfg.stroke;
       ctx.shadowBlur = 6;
       ctx.fill();

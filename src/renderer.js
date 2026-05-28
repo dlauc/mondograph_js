@@ -72,7 +72,7 @@ export class Renderer {
   start() {
     if (this._rafId != null) return;
     const loop = () => {
-      this._applyIdleNoise();
+      this._applyMotion();
       tickSprings(this.springNodes, this.theme.spring, this.theme.opacitySpring);
       // Prune fully-faded departed nodes to prevent unbounded Map growth
       for (const [id, s] of this.springNodes) {
@@ -142,9 +142,10 @@ export class Renderer {
     ctx.save();
     const cp = this.springNodes.get(this.centerId);
     if (cp) {
+      const aura = this.theme.centerAura ?? 'rgba(2,185,185,.18)';
       const grad = ctx.createRadialGradient(cp.x, cp.y, 0, cp.x, cp.y, min * 0.18);
-      grad.addColorStop(0,   'rgba(2,185,185,.18)');
-      grad.addColorStop(1,   'rgba(2,185,185,0)');
+      grad.addColorStop(0,   aura);
+      grad.addColorStop(1,   aura.replace(/[\d.]+\)$/, '0)'));
       ctx.fillStyle = grad;
       ctx.beginPath();
       ctx.arc(cp.x, cp.y, min * 0.18, 0, Math.PI * 2);
@@ -238,9 +239,23 @@ export class Renderer {
     ctx.restore();
   }
 
-  // Inject a tiny random impulse each frame so settled nodes subtly drift.
-  // The spring K and damping naturally bound the amplitude; centre node is excluded.
-  _applyIdleNoise() {
+  // Subtle resting motion. Prefer a calm, deterministic float (smooth sine
+  // drift per node, no per-frame randomness); fall back to legacy random idle
+  // noise only when a theme opts into it via spring.idleNoise.
+  _applyMotion() {
+    const fl = this.theme.float;
+    if (fl && fl.amp) {
+      this._t = (this._t ?? 0) + 1;
+      let i = 0;
+      for (const [id, s] of this.springNodes) {
+        if (id === this.centerId || s.targetOpacity === 0) { i++; continue; }
+        const phase = id.length * 1.7 + i * 0.9;
+        s.vx += Math.cos(this._t * fl.speed + phase) * fl.amp;
+        s.vy += Math.sin(this._t * fl.speed * 1.3 + phase) * fl.amp;
+        i++;
+      }
+      return;
+    }
     const amp = this.theme.spring.idleNoise ?? 0;
     if (amp === 0) return;
     for (const [id, s] of this.springNodes) {

@@ -5,6 +5,8 @@ import { Renderer }        from './renderer.js';
 import { Tooltip }         from './tooltip.js';
 import { hitTest, hitRadius } from './hittest.js';
 
+export { preload as preloadFlags, configureFlagBase, clearFlagCache } from './flagStore.js';
+
 export class ThinkGraph {
   /**
    * @param {{

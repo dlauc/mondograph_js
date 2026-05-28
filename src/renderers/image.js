@@ -25,7 +25,7 @@ export function drawImageNode(ctx, node, x, y, isCenter, theme) {
     ctx.drawImage(bitmap, x - r, y - r, r * 2, r * 2);
     ctx.restore();
   } else {
-    ctx.fillStyle = '#020f20';
+    ctx.fillStyle = theme.nodeFill ?? '#020f20';
     ctx.fill();
     _drawInitials(ctx, node.label, x, y, r, theme);
     if (node.imageUrl && bitmap !== 'loading' && bitmap !== 'error') _load(node.imageUrl);
