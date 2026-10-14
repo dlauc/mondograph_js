@@ -49,9 +49,11 @@ export function drawFlagNode(ctx, node, x, y, isCenter, theme) {
 
   // Soft drop shadow for depth (instead of a glow)
   ctx.save();
-  ctx.shadowColor   = theme.shadow ?? 'rgba(30,30,45,0.12)';
-  ctx.shadowBlur    = isCenter ? 14 : 8;
-  ctx.shadowOffsetY = 1.5;
+  if (!theme._noShadow) {
+    ctx.shadowColor   = theme.shadow ?? 'rgba(30,30,45,0.12)';
+    ctx.shadowBlur    = isCenter ? 14 : 8;
+    ctx.shadowOffsetY = 1.5;
+  }
   ctx.beginPath();
   ctx.arc(x, y, r, 0, Math.PI * 2);
   ctx.fillStyle = theme.badgeBacking ?? '#ffffff';
@@ -111,9 +113,11 @@ export function drawFlagOrb(ctx, iso, x, y, r, theme) {
 
   // White backing with soft shadow lifts the badge off the canvas
   ctx.save();
-  ctx.shadowColor   = theme.shadow ?? 'rgba(30,30,45,0.12)';
-  ctx.shadowBlur    = 4;
-  ctx.shadowOffsetY = 1;
+  if (!theme._noShadow) {
+    ctx.shadowColor   = theme.shadow ?? 'rgba(30,30,45,0.12)';
+    ctx.shadowBlur    = 4;
+    ctx.shadowOffsetY = 1;
+  }
   ctx.beginPath();
   ctx.arc(x, y, r + 1, 0, Math.PI * 2);
   ctx.fillStyle = theme.badgeBacking ?? '#ffffff';

@@ -16,17 +16,21 @@ const STYLE = [
   'transition:opacity .15s',
 ].join(';');
 
+export function escapeHtml(s) {
+  return String(s ?? '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+}
+
 function defaultRender(node) {
   const sub = node.lang
-    ? `<div style="font-size:10px;opacity:.45;text-transform:uppercase;letter-spacing:.06em;margin-top:2px">${node.lang} · ${node.type}</div>`
+    ? `<div style="font-size:10px;opacity:.45;text-transform:uppercase;letter-spacing:.06em;margin-top:2px">${escapeHtml(node.lang)} · ${escapeHtml(node.type)}</div>`
     : '';
   const ipa = node.meta?.ipa
-    ? `<div style="color:#02b9b9;font-size:11px;margin-top:2px">${node.meta.ipa}</div>`
+    ? `<div style="color:#02b9b9;font-size:11px;margin-top:2px">${escapeHtml(node.meta.ipa)}</div>`
     : '';
   const q = node.quality != null
-    ? `<span style="font-size:9px;background:rgba(2,185,185,.1);color:#02b9b9;padding:1px 4px;margin-top:4px;display:inline-block">quality: ${node.quality}</span>`
+    ? `<span style="font-size:9px;background:rgba(2,185,185,.1);color:#02b9b9;padding:1px 4px;margin-top:4px;display:inline-block">quality: ${escapeHtml(node.quality)}</span>`
     : '';
-  return `<strong>${node.label}</strong>${sub}${ipa}${q}`;
+  return `<strong>${escapeHtml(node.label)}</strong>${sub}${ipa}${q}`;
 }
 
 export class Tooltip {
@@ -46,7 +50,13 @@ export class Tooltip {
   setContainerSize(W, H) { this._W = W; this._H = H; }
 
   show(node, canvasX, canvasY) {
-    this._el.innerHTML = this._renderFn(node);
+    this.showHTML(this._renderFn(node), canvasX, canvasY);
+  }
+
+  /** Show caller-rendered HTML (already escaped) at a canvas position. */
+  showHTML(html, canvasX, canvasY) {
+    if (!html) { this.hide(); return; }
+    this._el.innerHTML = html;
     let x = canvasX + 28, y = canvasY - 10;
     if (this._W && x + 230 > this._W) x = canvasX - 240;
     if (this._H && y + 100 > this._H) y = Math.max(0, this._H - 110);

@@ -55,9 +55,11 @@ function paintNameDisc(ctx, x, y, r, stroke, isCenter, theme) {
   }
 
   ctx.save();
-  ctx.shadowColor   = theme.shadow ?? 'rgba(30,30,45,0.12)';
-  ctx.shadowBlur    = isCenter ? 16 : 9;
-  ctx.shadowOffsetY = 1.5;
+  if (!theme._noShadow) {
+    ctx.shadowColor   = theme.shadow ?? 'rgba(30,30,45,0.12)';
+    ctx.shadowBlur    = isCenter ? 16 : 9;
+    ctx.shadowOffsetY = 1.5;
+  }
   ctx.beginPath();
   ctx.arc(x, y, r, 0, Math.PI * 2);
   ctx.fillStyle = theme.nodeFill ?? '#ffffff';
@@ -72,25 +74,59 @@ function paintNameDisc(ctx, x, y, r, stroke, isCenter, theme) {
   ctx.stroke();
 }
 
-/** Ink label + muted sub-label (+ optional IPA) centred in a disc. */
+/** Font size (px) of a node's main label: shared by drawing and label placement. */
+export function labelFontSize(node, isCenter) {
+  const popularity = node.popularity ?? 0.5;
+  const fontSize = isCenter ? 19 : ((String(node.label ?? '').length) > 7 ? 10.5 : 13);
+  // quantised to 0.5 px so batched drawing switches fonts rarely
+  return Math.round(fontSize * (0.85 + 0.3 * popularity) * 2) / 2;
+}
+
+/** Vertical offset of the inside label relative to the node centre. */
+export function insideLabelOffset(node, isCenter) {
+  const hasIPA = !!node.ipa;
+  return -(isCenter ? (hasIPA ? 9 : 3) : (hasIPA ? 7 : 2));
+}
+
+/**
+ * Ink label + muted sub-label (+ optional IPA) centred in a disc.
+ * `node._lp` (label placement: {text, dx, dy, inside, hidden}) moves or
+ * truncates the main label; `node._noLabel` suppresses it (low zoom).
+ */
 function paintDiscText(ctx, node, x, y, isCenter, theme, { sub, popularity }) {
   const hasIPA   = !!node.ipa;
-  const fontSize = isCenter ? 19 : ((node.label?.length ?? 0) > 7 ? 10.5 : 13);
-  const scale    = fontSize * (0.85 + 0.3 * popularity);
-  const labelY   = y - (isCenter ? (hasIPA ? 9 : 3) : (hasIPA ? 7 : 2));
+  const scale    = labelFontSize(node, isCenter);
+  const labelY   = y + insideLabelOffset(node, isCenter);
+  const lp       = node._lp;
+  const text     = lp ? lp.text : (node.label ?? '');
+  const showMain = !node._noLabel && !(lp && lp.hidden) && text;
 
-  ctx.fillStyle    = theme.nodeLabel ?? '#22202b';
-  ctx.font         = `700 ${scale}px ${theme.font}`;
   ctx.textAlign    = 'center';
   ctx.textBaseline = 'middle';
-  ctx.fillText(node.label ?? '', x, labelY);
+  ctx.font         = `700 ${scale}px ${theme.font}`;
+  if (showMain) {
+    if (lp && !lp.inside) {
+      // outside the disc: paper halo so it reads over edges
+      ctx.lineWidth   = 3;
+      ctx.lineJoin    = 'round';
+      ctx.strokeStyle = theme.labelBackground ?? theme.background;
+      ctx.strokeText(text, x + lp.dx, y + lp.dy);
+      ctx.fillStyle = theme.nodeLabel ?? '#22202b';
+      ctx.fillText(text, x + lp.dx, y + lp.dy);
+    } else {
+      ctx.fillStyle = theme.nodeLabel ?? '#22202b';
+      ctx.fillText(text, x, labelY);
+    }
+  }
+  if (node._noLabel) return;
 
+  const mainInside = showMain && !(lp && !lp.inside);
   ctx.fillStyle = theme.nodeSubLabel ?? 'rgba(34,32,43,0.45)';
   ctx.font      = `500 7px ${theme.font}`;
-  const subY    = labelY + (isCenter ? 14 : 11);
+  const subY    = mainInside ? labelY + (isCenter ? 14 : 11) : y;
   ctx.fillText(sub, x, subY);
 
-  if (hasIPA) {
+  if (hasIPA && mainInside) {
     ctx.fillStyle = theme.nodeSubLabel ?? 'rgba(34,32,43,0.45)';
     ctx.font      = `italic 400 ${isCenter ? 8 : 6}px ${theme.font}`;
     ctx.fillText(`/${node.ipa}/`, x, subY + (isCenter ? 10 : 8));
@@ -114,6 +150,7 @@ export function drawNode(ctx, node, x, y, isCenter, theme) {
     case 'referent':    drawReferent(ctx, node, x, y, theme);    break;
     case 'element':     drawElement(ctx, node, x, y, theme);     break;
     case 'attestation': drawAttestation(ctx, node, x, y, theme); break;
+    case 'stub':        drawStub(ctx, node, x, y, theme);        break;
     default:            drawTextNode(ctx, node, x, y, isCenter, theme);
   }
 
@@ -155,9 +192,11 @@ function drawSurnameNode(ctx, node, x, y, isCenter, theme) {
 
   // Soft drop shadow + paper card
   ctx.save();
-  ctx.shadowColor   = theme.shadow ?? 'rgba(30,30,45,0.12)';
-  ctx.shadowBlur    = isCenter ? 14 : 8;
-  ctx.shadowOffsetY = 1.5;
+  if (!theme._noShadow) {
+    ctx.shadowColor   = theme.shadow ?? 'rgba(30,30,45,0.12)';
+    ctx.shadowBlur    = isCenter ? 14 : 8;
+    ctx.shadowOffsetY = 1.5;
+  }
   ctx.beginPath();
   ctx.roundRect(rx, ry, w, h, h / 2);
   ctx.fillStyle = theme.nodeFill ?? '#ffffff';
@@ -272,4 +311,131 @@ function drawAttestation(ctx, node, x, y, theme) {
   ctx.textAlign    = 'center';
   ctx.textBaseline = 'middle';
   ctx.fillText(node.label ?? '', x, y + 2.5);
+}
+
+/** "+N more" stub: a dashed pill standing in for collapsed nodes of a sector. */
+function drawStub(ctx, node, x, y, theme) {
+  const text = node.label ?? `+${node.count ?? ''}`;
+  ctx.font = `600 11px ${theme.font}`;
+  const w = Math.max(34, ctx.measureText(text).width + 16), h = 22;
+  ctx.beginPath();
+  ctx.roundRect(x - w / 2, y - h / 2, w, h, h / 2);
+  ctx.fillStyle = theme.nodeFill ?? '#ffffff';
+  ctx.fill();
+  ctx.setLineDash([3, 2]);
+  ctx.lineWidth = 1.2;
+  ctx.strokeStyle = theme.accent ?? theme.centerGlow;
+  ctx.stroke();
+  ctx.setLineDash([]);
+  ctx.fillStyle = theme.accent ?? theme.centerGlow;
+  ctx.textAlign = 'center';
+  ctx.textBaseline = 'middle';
+  ctx.fillText(text, x, y + 0.5);
+}
+
+/** Whether a node can be drawn by drawDiscBatch (plain name disc, no flags). */
+export function isBatchableDisc(node) {
+  const t = node.type;
+  if (t === 'surname' || t === 'concept' || t === 'referent' || t === 'element' || t === 'attestation'
+      || t === 'flag' || t === 'image' || t === 'stub') return false;
+  return !node.countriesData && !(node.flags && node.flags.length) && !(node.countries && node.countries.length);
+}
+
+/**
+ * Draw many plain name discs at once: one fill path per opacity bucket, one
+ * stroke path per ring colour, one font switch per label size. Visually the
+ * same as drawNode() for non-centre discs, minus the drop shadow.
+ * @param {Array<{node:object, x:number, y:number, r:number, opacity:number}>} items
+ */
+export function drawDiscBatch(ctx, items, theme) {
+  const buckets = new Map();
+  for (const it of items) {
+    const a = Math.round(it.opacity * 20) / 20;
+    if (a <= 0) continue;
+    let b = buckets.get(a);
+    if (!b) buckets.set(a, b = []);
+    b.push(it);
+  }
+  const fill = theme.nodeFill ?? '#ffffff';
+  const ink = theme.nodeLabel ?? '#22202b';
+  const subInk = theme.nodeSubLabel ?? 'rgba(34,32,43,0.45)';
+  const halo = theme.labelBackground ?? theme.background;
+  ctx.save();
+  ctx.setLineDash([]);
+  ctx.textAlign = 'center';
+  ctx.textBaseline = 'middle';
+  for (const [a, list] of buckets) {
+    ctx.globalAlpha = a;
+    ctx.beginPath();
+    for (const it of list) { ctx.moveTo(it.x + it.r, it.y); ctx.arc(it.x, it.y, it.r, 0, Math.PI * 2); }
+    ctx.fillStyle = fill;
+    ctx.fill();
+
+    const byStroke = new Map();
+    for (const it of list) {
+      const n = it.node;
+      let stroke = langColor(theme, n.lang);
+      if (n.type === 'given' && n.gender && theme.genderColors?.[n.gender]) stroke = theme.genderColors[n.gender];
+      let g = byStroke.get(stroke);
+      if (!g) byStroke.set(stroke, g = []);
+      g.push(it);
+    }
+    ctx.lineWidth = 1.6;
+    for (const [stroke, g] of byStroke) {
+      ctx.beginPath();
+      for (const it of g) { ctx.moveTo(it.x + it.r, it.y); ctx.arc(it.x, it.y, it.r, 0, Math.PI * 2); }
+      ctx.strokeStyle = stroke;
+      ctx.stroke();
+    }
+
+    // main labels, grouped by font size
+    const labelled = list.filter(it => !it.node._noLabel)
+      .map(it => {
+        const n = it.node, lp = n._lp;
+        const text = lp ? lp.text : String(n.label ?? '');
+        const show = !(lp && lp.hidden) && text;
+        return { it, n, lp, text, show, size: labelFontSize(n, false) };
+      });
+    labelled.sort((p, q) => p.size - q.size);
+    let font = '';
+    ctx.fillStyle = ink;
+    const outside = [];
+    for (const L of labelled) {
+      if (!L.show) continue;
+      if (L.lp && !L.lp.inside) { outside.push(L); continue; }
+      const f = `700 ${L.size}px ${theme.font}`;
+      if (f !== font) { ctx.font = f; font = f; }
+      ctx.fillText(L.text, L.it.x, L.it.y + insideLabelOffset(L.n, false));
+    }
+    if (outside.length) {
+      ctx.lineWidth = 3;
+      ctx.lineJoin = 'round';
+      ctx.strokeStyle = halo;
+      for (const L of outside) {
+        const f = `700 ${L.size}px ${theme.font}`;
+        if (f !== font) { ctx.font = f; font = f; }
+        ctx.strokeText(L.text, L.it.x + L.lp.dx, L.it.y + L.lp.dy);
+        ctx.fillText(L.text, L.it.x + L.lp.dx, L.it.y + L.lp.dy);
+      }
+    }
+    // sub-labels (language) and IPA
+    if (list[0] && list[0].node._noSub) continue;
+    ctx.fillStyle = subInk;
+    ctx.font = font = `500 7px ${theme.font}`;
+    const ipas = [];
+    for (const L of labelled) {
+      const n = L.n;
+      const mainInside = L.show && !(L.lp && !L.lp.inside);
+      const labelY = L.it.y + insideLabelOffset(n, false);
+      const subY = mainInside ? labelY + 11 : L.it.y;
+      const sub = n.lang ? String(n.lang).toUpperCase() : (n.type === 'given' ? 'GIVEN NAME' : String(n.type ?? 'text').toUpperCase());
+      ctx.fillText(sub, L.it.x, subY);
+      if (n.ipa && mainInside) ipas.push([`/${n.ipa}/`, L.it.x, subY + 8]);
+    }
+    if (ipas.length) {
+      ctx.font = `italic 400 6px ${theme.font}`;
+      for (const [t, x, y] of ipas) ctx.fillText(t, x, y);
+    }
+  }
+  ctx.restore();
 }

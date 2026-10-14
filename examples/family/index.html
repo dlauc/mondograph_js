@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Name family demo</title>
+<style>
+  :root {
+    --bg: #fbfaf8; --ink: #22202b; --muted: rgba(34,32,43,.55); --line: rgba(20,20,30,.12); --accent: #0d9488;
+    --mg-background: #fbfaf8; --mg-ink: #22202b; --mg-muted: rgba(34,32,43,.45); --mg-accent: #0d9488;
+    --mg-node-fill: #ffffff; --mg-hull-alpha: .07;
+    --mg-edge-f2: #2563eb; --mg-edge-f3: #7c3aed; --mg-edge-f5: #db2777; --mg-edge-f8: #52525b;
+  }
+  :root[data-theme="dark"] {
+    --bg: #0f1115; --ink: #ecebe6; --muted: rgba(236,235,230,.55); --line: rgba(255,255,255,.12); --accent: #2dd4bf;
+    --mg-background: #0f1115; --mg-ink: #ecebe6; --mg-muted: rgba(236,235,230,.5); --mg-accent: #2dd4bf;
+    --mg-node-fill: #1a1d24; --mg-chip-fill: #1a1d24; --mg-chip-ink: #ecebe6; --mg-chip-stroke: rgba(255,255,255,.2);
+    --mg-label-bg: #0f1115; --mg-focus: #ecebe6; --mg-shadow: rgba(0,0,0,.5); --mg-hull-alpha: .12;
+    --mg-edge-f2: #60a5fa; --mg-edge-f3: #a78bfa; --mg-edge-f5: #f472b6; --mg-edge-f8: #a1a1aa; --mg-edge: rgba(255,255,255,.35);
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--bg); color: var(--ink); font: 14px/1.45 "Noto Sans", system-ui, sans-serif; }
+  header { padding: 12px 16px; border-bottom: 1px solid var(--line); display: flex; flex-wrap: wrap; gap: 8px 16px; align-items: center; }
+  h1 { font-size: 17px; margin: 0 12px 0 0; }
+  label, button, select { font: inherit; color: inherit; }
+  button, select { background: transparent; border: 1px solid var(--line); border-radius: 6px; padding: 4px 10px; cursor: pointer; }
+  button:focus-visible, select:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+  .fams { display: flex; flex-wrap: wrap; gap: 4px 10px; font-size: 12.5px; }
+  main { display: grid; grid-template-columns: 1fr 320px; height: calc(100vh - 110px); min-height: 420px; }
+  #graph { position: relative; min-height: 420px; }
+  #graph:focus-within { outline: 2px solid var(--accent); outline-offset: -2px; }
+  aside { border-left: 1px solid var(--line); padding: 14px 16px; overflow: auto; }
+  aside h2 { font-size: 15px; margin: 0 0 6px; }
+  aside dl { display: grid; grid-template-columns: auto 1fr; gap: 2px 10px; font-size: 13px; }
+  aside dt { color: var(--muted); }
+  .hint { color: var(--muted); font-size: 12.5px; }
+  footer { padding: 6px 16px; border-top: 1px solid var(--line); font-size: 12px; color: var(--muted); }
+  @media (max-width: 760px) { main { grid-template-columns: 1fr; height: auto; } #graph { height: 70vh; } aside { border-left: 0; border-top: 1px solid var(--line); } }
+</style>
+</head>
+<body>
+<header>
+  <h1>The <span id="title">Radovan</span> name family</h1>
+  <label>Start <select id="anchor">
+    <option value="radovan-hr">Radovan</option><option value="muhammad-ar">Muhammad</option>
+    <option value="friedrich-de">Friedrich</option><option value="hiroshi-ja">Hiroshi</option>
+  </select></label>
+  <label>View <select id="layout">
+    <option value="sectors">Family (sectors)</option><option value="layered">Lineage (layered)</option>
+    <option value="similarity">Similarity</option><option value="rings">Rings (0.1)</option>
+  </select></label>
+  <button id="back" type="button" disabled>Back</button>
+  <button id="expand" type="button" title="addNeighbors on the selected node">Expand selected</button>
+  <label><input type="checkbox" id="supp"> show suppressed</label>
+  <button id="dark" type="button">Dark mode</button>
+  <button id="svg" type="button">Save SVG</button>
+  <button id="png" type="button">Save PNG</button>
+  <div class="fams" id="fams" role="group" aria-label="Relations"></div>
+</header>
+<main>
+  <div id="graph"></div>
+  <aside id="drawer" tabindex="-1" aria-live="polite">
+    <h2>Explore</h2>
+    <p class="hint">Click a name to re-centre, a line to see the link, a pill to see a spelling. Keyboard: Tab into the graph, ←/→ walk the neighbours, ↓ step into a neighbour's links, ↑ step back, Enter re-centres, Esc goes back, Tab reaches the focused name's links and spellings.</p>
+  </aside>
+</main>
+<footer>Illustrative data (examples/ui_sample_network.json). Lines: solid recorded · dashed modelled · dot = community · dotted unknown · // disputed · ? uncertain.</footer>
+
+<script type="module">
+import { MondoGraph, VERSION } from '../../dist/mondograph.esm.js';
+import { adapt, neighbourhood, FAMILY_LABEL } from './adapt.js';
+
+const raw = await (await fetch('../ui_sample_network.json')).json();
+const DATA = adapt(raw);
+const $ = (id) => document.getElementById(id);
+const drawer = $('drawer');
+const esc = (s) => String(s ?? '').replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+
+const enabled = new Set(['F2', 'F3', 'F4', 'F5', 'F6', 'F7', 'F8']);
+for (const f of ['F2', 'F3', 'F4', 'F5', 'F6', 'F7', 'F8']) {
+  const l = document.createElement('label');
+  l.innerHTML = `<input type="checkbox" checked data-f="${f}"> ${FAMILY_LABEL[f]}`;
+  $('fams').appendChild(l);
+}
+
+const lineageOnly = (e) => e.family === 'F8';
+let selectedNodeId = null;
+
+const graph = new MondoGraph({
+  container: $('graph'),
+  theme: 'editorialLight',
+  layout: 'sectors',
+  layoutOptions: { maxPerSector: 5, sectorOrder: ['F2', 'F3', 'F5', 'F6', 'F7', 'F4', 'F8'] },
+  ariaLabel: 'Name family graph',
+  drawerId: 'drawer',
+  getNeighbors: async (id) => neighbourhood(DATA, id, 2, $('layout').value === 'layered' ? lineageOnly : () => true),
+  describeEdge: (edge) => edge.label ?? edge.predicate,
+  onSelect: (node) => {
+    selectedNodeId = node.id;
+    $('title').textContent = node.label;
+    $('back').disabled = !graph.canGoBack;
+    drawer.innerHTML = `<h2>${esc(node.label)}</h2><dl>
+      <dt>Language</dt><dd>${esc(node.lang ?? '—')}</dd>
+      <dt>Type</dt><dd>${esc(node.type)}</dd>
+      ${node.ipa ? `<dt>IPA</dt><dd>/${esc(node.ipa)}/</dd>` : ''}
+      <dt>Spellings</dt><dd>${(node.chips ?? []).map(c => esc(c.label)).join(', ') || '—'}</dd></dl>`;
+  },
+  onEdgeSelect: (edge) => {
+    if (!edge) return;
+    drawer.innerHTML = `<h2>${esc(FAMILY_LABEL[edge.family] ?? edge.family)}</h2>
+      <p>${esc(edge.label)}</p><dl>
+      <dt>Predicate</dt><dd>${esc(edge.predicate)}</dd><dt>Provenance</dt><dd>${esc(edge.provenance)}</dd>
+      <dt>Certainty</dt><dd>${esc(edge.certainty)}</dd><dt>Status</dt><dd>${esc(edge.status)}</dd>
+      <dt>Assertion</dt><dd>${esc(edge.assertionId)}</dd></dl>
+      <p><button type="button" id="confirm">Confirm</button> <button type="button" id="dispute">Dispute</button> <button type="button" id="close">Back to graph</button></p>`;
+    $('confirm').focus();
+    $('close').onclick = () => graph.focusEdge(edge.id);
+  },
+  onChipSelect: (node, chip) => {
+    drawer.innerHTML = chip.overflow
+      ? `<h2>${chip.count} more spellings of ${esc(node.label)}</h2><p>${chip.hidden.map(c => esc(c.label)).join(', ')}</p>`
+      : `<h2>${esc(chip.label)}</h2><p>Same name as ${esc(node.label)}, other spelling or script.</p><dl>
+         <dt>Status</dt><dd>${esc(chip.status)}</dd><dt>Assertion</dt><dd>${esc(chip.assertionId)}</dd></dl>`;
+  },
+  onCenterChange: () => { $('back').disabled = !graph.canGoBack; },
+});
+window.graph = graph;
+console.log('mondograph', VERSION);
+
+function applyFilter() {
+  const all = enabled.size === 7;
+  graph.setFilter(all ? null : { edge: (e) => enabled.has(e.family) });
+}
+$('fams').addEventListener('change', (e) => {
+  const f = e.target.dataset.f;
+  if (e.target.checked) enabled.add(f); else enabled.delete(f);
+  applyFilter();
+});
+$('anchor').onchange = () => graph.setCenter($('anchor').value);
+$('layout').onchange = () => {
+  const v = $('layout').value;
+  graph.setLayout(v, v === 'sectors' ? { maxPerSector: 5, sectorOrder: ['F2', 'F3', 'F5', 'F6', 'F7', 'F4', 'F8'] } : {});
+  graph.setCenter(graph.centerId, { push: false });
+};
+$('back').onclick = () => graph.back();
+$('supp').onchange = (e) => graph.setShowSuppressed(e.target.checked);
+$('expand').onclick = () => {
+  const id = selectedNodeId ?? graph.centerId;
+  graph.addNeighbors(id, neighbourhood(DATA, id, 1));
+};
+$('dark').onclick = () => {
+  const d = document.documentElement;
+  d.dataset.theme = d.dataset.theme === 'dark' ? 'light' : 'dark';
+  graph.refreshTheme();
+};
+const save = (blob, name) => { const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = name; a.click(); };
+$('svg').onclick = () => save(new Blob([graph.toSVG()], { type: 'image/svg+xml' }), 'name-family.svg');
+$('png').onclick = async () => save(await graph.toPNG(2), 'name-family.png');
+
+await graph.setCenter('radovan-hr');
+</script>
+</body>
+</html>

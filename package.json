@@ -1,21 +1,47 @@
 {
-  "name": "thinkgraph",
-  "version": "0.1.0",
+  "name": "mondograph",
+  "version": "0.2.0",
+  "description": "Zero-dependency canvas graph explorer for name families: sectored, layered and similarity layouts, edge and chip interaction, group hulls, a keyboard/screen-reader DOM mirror, CSS-token theming and SVG/PNG export.",
+  "license": "MIT",
   "type": "module",
-  "main": "dist/thinkgraph.umd.js",
-  "module": "dist/thinkgraph.esm.js",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/dlauc/mondograph_js.git"
+  },
+  "main": "dist/mondograph.umd.cjs",
+  "module": "dist/mondograph.esm.js",
+  "types": "index.d.ts",
   "exports": {
     ".": {
+      "types": "./index.d.ts",
+      "import": "./dist/mondograph.esm.js",
+      "require": "./dist/mondograph.umd.cjs",
+      "default": "./dist/mondograph.esm.js"
+    },
+    "./thinkgraph": {
+      "types": "./index.d.ts",
       "import": "./dist/thinkgraph.esm.js",
-      "default": "./dist/thinkgraph.umd.js"
-    }
+      "require": "./dist/mondograph.umd.cjs",
+      "default": "./dist/thinkgraph.esm.js"
+    },
+    "./package.json": "./package.json"
   },
+  "files": [
+    "dist",
+    "index.d.ts",
+    "README.md",
+    "LICENSE"
+  ],
+  "sideEffects": false,
   "scripts": {
-    "test":  "node --test test/**/*.test.js",
+    "test": "node --test test/**/*.test.js",
     "build": "node build.js",
-    "dev":   "node --watch --test test/**/*.test.js"
+    "dev": "node --watch --test test/**/*.test.js",
+    "serve": "node examples/serve.mjs",
+    "bench": "node examples/bench/run.mjs"
   },
   "devDependencies": {
-    "esbuild": "^0.21.0"
+    "esbuild": "^0.21.0",
+    "playwright": "^1.64.1"
   }
 }

@@ -34,6 +34,7 @@ export function hitRadius(node, isCenter, isTouch) {
   else if (type === 'concept')     r = 18;
   else if (type === 'referent')    r = 20;
   else if (type === 'element')     r = 12;
+  else if (type === 'stub')        r = 18;
   else                             r = 22;
 
   const popularity = node && typeof node === 'object' && node.popularity != null ? node.popularity : 0.5;
