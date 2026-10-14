@@ -5,6 +5,11 @@
 // disc (nor an obstacle such as a chip row) wins. Failing that the label is
 // truncated with an ellipsis to fit inside its own disc; failing that it is
 // hidden. The full label stays available in the tooltip and the DOM mirror.
+//
+// `insideOnly` keeps every label inside its own disc, as a name card does:
+// the font shrinks (to 70%, never under 7 px) until the label fits, and past
+// that it is truncated with an ellipsis. A label is never moved away from its
+// disc, and never hidden while it has a character to show.
 
 const CELL = 64;
 
@@ -56,9 +61,10 @@ export function truncateToWidth(text, maxW, measure) {
  *   vertical offset (default 0). A label wider than `fitW` is not placed
  *   inside at full length (it moves out, or is truncated to fit).
  * @param {{measure:(text:string, size:number)=>number,
- *   obstacles?:Array<{x0,y0,x1,y1,owner?:string}>, pad?:number}} opts
+ *   obstacles?:Array<{x0,y0,x1,y1,owner?:string}>, pad?:number, insideOnly?:boolean, minScale?:number}} opts
  * @returns {Map<string,{text:string, dx:number, dy:number, inside:boolean,
- *   truncated:boolean, hidden:boolean, box:{x0,y0,x1,y1}|null}>}
+ *   truncated:boolean, hidden:boolean, box:{x0,y0,x1,y1}|null, size?:number}>}
+ *   `size` is the font size used, when `insideOnly` shrank it.
  */
 export function placeLabels(items, opts) {
   const measure = opts.measure;
@@ -73,7 +79,20 @@ export function placeLabels(items, opts) {
     .sort((a, b) => (b.it.fixed ? 1 : 0) - (a.it.fixed ? 1 : 0)
       || (b.it.priority ?? 0) - (a.it.priority ?? 0) || a.i - b.i);
 
+  const minScale = opts.minScale ?? 0.7;
   for (const { it } of order) {
+    if (opts.insideOnly) {
+      const fitW = it.fitW ?? Math.max(0, 2 * it.r - 6);
+      let size = it.size;
+      const floor = Math.max(7, Math.round(it.size * minScale * 2) / 2);
+      while (size > floor && measure(it.text, size) > fitW) size = Math.max(floor, size - 0.5);
+      const t = it.fixed ? it.text : truncateToWidth(it.text, fitW, (s) => measure(s, size));
+      const w = measure(t, size), h = size * 1.15, iy = it.insideY ?? 0;
+      const b = t ? { x0: it.x - w / 2 - pad, x1: it.x + w / 2 + pad, y0: it.y + iy - h / 2 - pad, y1: it.y + iy + h / 2 + pad, owner: it.id } : null;
+      if (b) placed.add(b);
+      out.set(it.id, { text: t, dx: 0, dy: iy, inside: true, truncated: t !== it.text, hidden: !t, box: b, size });
+      continue;
+    }
     const h = it.size * 1.15;
     const w = measure(it.text, it.size);
     const iy = it.insideY ?? 0;

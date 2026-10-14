@@ -1,6 +1,6 @@
 {
   "name": "mondograph",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "description": "Zero-dependency canvas graph explorer for name families: sectored, layered and similarity layouts, edge and chip interaction, group hulls, a keyboard/screen-reader DOM mirror, CSS-token theming and SVG/PNG export.",
   "license": "MIT",
   "type": "module",

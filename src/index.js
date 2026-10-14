@@ -25,7 +25,7 @@ export { defaultDescribeNode, defaultDescribeEdge } from './a11y.js';
 export { hashString, jitter } from './hash.js';
 export { visualRadius } from './renderer.js';
 
-export const VERSION = '0.2.0';
+export const VERSION = '0.2.1';
 
 const EDGE_TOL_MOUSE = 6;
 const EDGE_TOL_TOUCH = 14;
@@ -259,7 +259,7 @@ export class MondoGraph {
   selectEdge(id) {
     this._selectedEdgeId = id == null ? null : String(id);
     this._renderer.selectedEdgeId = this._selectedEdgeId;
-    this._renderer.invalidateOverlay();
+    this._touchEdgeFocus();
   }
 
   get selectedEdge() { return this._selectedEdgeId ? this._edgeById.get(this._selectedEdgeId) ?? null : null; }
@@ -513,6 +513,7 @@ export class MondoGraph {
     r.labelPlacement = placeLabels(r.labelItems(this._targets), {
       measure: (text, size) => r.measure(text, `700 ${size}px ${font}`),
       obstacles,
+      insideOnly: this._opts.labels === 'inside',
     });
     r.invalidate();
   }
@@ -551,7 +552,23 @@ export class MondoGraph {
   _edgeAlphaOf(e) {
     if (this._fadedEdges.has(e.id)) return this._theme.fadeAlpha ?? 0.12;
     if (this._highlight && !this._highlight.has(e.id) && !(this._highlight.has(e.from) && this._highlight.has(e.to))) return 0.3;
+    const ef = this._opts.edgeFocus;
+    if (ef) {
+      // Only the focus's own edges, and those of the node in hand (hovered,
+      // keyboard-focused, or an end of the selected edge), at full strength.
+      const r = this._renderer;
+      const live = [this._centerId, r.hoveredId, r.focusedId];
+      const sel = this._selectedEdgeId ? this._edgeById.get(this._selectedEdgeId) : null;
+      if (sel) live.push(sel.from, sel.to);
+      if (e.id === this._selectedEdgeId || live.includes(e.from) || live.includes(e.to)) return 1;
+      return typeof ef === 'number' ? ef : 0.12;
+    }
     return 1;
+  }
+
+  /** Under edgeFocus the base layer depends on the node in hand. */
+  _touchEdgeFocus() {
+    if (this._opts.edgeFocus) this._renderer.invalidate(); else this._renderer.invalidateOverlay();
   }
 
   _edgeVisible(e) {
@@ -612,7 +629,11 @@ export class MondoGraph {
         const chip = node?.chips?.find(c => c.id === chipId);
         if (node && chip) this._opts.onChipSelect?.(node, chip);
       },
-      setFocus: (id) => { this._renderer.focusedId = id; this._renderer.invalidateOverlay(); },
+      setFocus: (id) => {
+        const was = this._renderer.focusedId;
+        this._renderer.focusedId = id;
+        if (was !== id) this._touchEdgeFocus(); else this._renderer.invalidateOverlay();
+      },
       setFocusedEdge: (id) => { this._renderer.focusedEdgeId = id; this._renderer.invalidateOverlay(); },
       setFocusedChip: (nodeId, chipId) => {
         this._renderer.focusedChip = chipId ? { nodeId, chipId } : null;
@@ -788,7 +809,9 @@ export class MondoGraph {
     r.hoveredEdgeId = hit?.kind === 'edge' ? hit.id : null;
     r.hoveredChip = hit?.kind === 'chip' ? { nodeId: hit.nodeId, chipId: hit.chip.id } : null;
     const now = `${r.hoveredId}|${r.hoveredEdgeId}|${r.hoveredChip?.nodeId}|${r.hoveredChip?.chipId}`;
-    if (prev !== now) r.invalidateOverlay();
+    if (prev !== now) {
+      if (prev.split('|')[0] !== now.split('|')[0]) this._touchEdgeFocus(); else r.invalidateOverlay();
+    }
     r.canvas.style.cursor = hit ? 'pointer' : 'grab';
     if (!hit) { this._tooltip.hide(); return; }
     if (hit.kind === 'node') {

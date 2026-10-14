@@ -95,9 +95,9 @@ export function insideLabelOffset(node, isCenter) {
  */
 function paintDiscText(ctx, node, x, y, isCenter, theme, { sub, popularity }) {
   const hasIPA   = !!node.ipa;
-  const scale    = labelFontSize(node, isCenter);
-  const labelY   = y + insideLabelOffset(node, isCenter);
   const lp       = node._lp;
+  const scale    = lp?.size ?? labelFontSize(node, isCenter);
+  const labelY   = y + insideLabelOffset(node, isCenter);
   const text     = lp ? lp.text : (node.label ?? '');
   const showMain = !node._noLabel && !(lp && lp.hidden) && text;
 
@@ -394,7 +394,7 @@ export function drawDiscBatch(ctx, items, theme) {
         const n = it.node, lp = n._lp;
         const text = lp ? lp.text : String(n.label ?? '');
         const show = !(lp && lp.hidden) && text;
-        return { it, n, lp, text, show, size: labelFontSize(n, false) };
+        return { it, n, lp, text, show, size: lp?.size ?? labelFontSize(n, false) };
       });
     labelled.sort((p, q) => p.size - q.size);
     let font = '';

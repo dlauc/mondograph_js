@@ -1,4 +1,4 @@
-// Type declarations for mondograph 0.2 (hand-written; keep in step with src/).
+// Type declarations for mondograph 0.2.1 (hand-written; keep in step with src/).
 
 // ── Data schemas ────────────────────────────────────────────────────────────
 
@@ -258,6 +258,14 @@ export interface MondoGraphOptions {
   chipsFor?: 'all' | 'focus' | 'none';
   /** Chips drawn per node before the "+k" overflow chip. Default 4. */
   maxChips?: number;
+  /** 'auto' (default) moves a label that does not fit beside its disc; 'inside'
+   *  keeps every label in its own disc, shrinking the font to 70% and then
+   *  truncating with "…" (the full name stays in the tooltip and the mirror). */
+  labels?: 'auto' | 'inside';
+  /** Draw only the centre's edges, and those of the hovered / keyboard-focused
+   *  node or the selected edge, at full strength; the rest at this alpha
+   *  (true = 0.12). Default false. */
+  edgeFocus?: boolean | number;
 
   /** Fired after every re-centre (and when the centre is clicked again) with the centre node. */
   onSelect?: (node: GraphNode) => void;
@@ -378,8 +386,8 @@ export interface ChipBox { chip: GraphChip | OverflowChip; x: number; y: number;
 export function layoutChips(chips: GraphChip[], x: number, y: number, r: number, opts: { max?: number; measure: (text: string) => number; showSuppressed?: boolean; rowWidth?: number; gap?: number; padX?: number }): ChipBox[];
 export function hitTestChips(px: number, py: number, boxes: Array<ChipBox & { nodeId: string }>, pad?: number): { nodeId: string; chip: GraphChip | OverflowChip } | null;
 export interface LabelItem { id: string; x: number; y: number; r: number; text: string; size: number; priority?: number; fixed?: boolean; insideY?: number; fitW?: number }
-export interface LabelPlacement { text: string; dx: number; dy: number; inside: boolean; truncated: boolean; hidden: boolean; box: { x0: number; y0: number; x1: number; y1: number } | null }
-export function placeLabels(items: LabelItem[], opts: { measure: (text: string, size: number) => number; obstacles?: Array<{ x0: number; y0: number; x1: number; y1: number; owner?: string }>; pad?: number }): Map<string, LabelPlacement>;
+export interface LabelPlacement { text: string; dx: number; dy: number; inside: boolean; truncated: boolean; hidden: boolean; box: { x0: number; y0: number; x1: number; y1: number } | null; size?: number }
+export function placeLabels(items: LabelItem[], opts: { measure: (text: string, size: number) => number; obstacles?: Array<{ x0: number; y0: number; x1: number; y1: number; owner?: string }>; pad?: number; insideOnly?: boolean; minScale?: number }): Map<string, LabelPlacement>;
 export function truncateToWidth(text: string, maxW: number, measure: (s: string) => number): string;
 export function convexHull(points: Array<[number, number]>): Array<[number, number]>;
 export function hullPolygon(circles: Array<{ x: number; y: number; r: number }>, pad?: number, samples?: number): Array<[number, number]>;

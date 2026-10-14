@@ -706,6 +706,7 @@ export class Renderer {
         Object.assign(node, { shape: 'pill', w: 40, h: 22, stroke: theme.accent ?? theme.centerGlow, label: n.label, labelSize: 11 });
       } else if (lp && !lp.hidden) {
         node.label = lp.text;
+        if (lp.size) node.labelSize = lp.size;
         node.labelX = o.x + lp.dx; node.labelY = o.y + lp.dy;
         if (lp.inside) { node.sub = n.lang ? String(n.lang).toUpperCase() : undefined; node.subY = o.y + lp.dy + (isCenter ? 14 : 11); }
       } else if (!lp) {

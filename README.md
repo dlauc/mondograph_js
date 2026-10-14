@@ -77,6 +77,16 @@ Chips are pills under a node. At most `maxChips` are shown, and the rest fold
 into a `+k` chip. Each chip is hit-testable and carries its `assertionId`
 back to you.
 
+`labels: 'inside'` keeps every name inside its own disc: the font shrinks to
+70% (never under 7 px) and past that the name is truncated with "…". A label
+is never drawn away from its disc; the full name stays in the tooltip and the
+DOM mirror. The default, `'auto'`, moves a label that does not fit beside its
+disc when there is room.
+
+`edgeFocus: true` (or an alpha, default 0.12) draws only the centre's edges,
+and those of the hovered or keyboard-focused node and the selected edge, at
+full strength; every other edge stays faint until its node is in hand.
+
 ## Layouts
 
 Each layout is a pure, deterministic function

@@ -860,9 +860,9 @@ function insideLabelOffset(node, isCenter) {
 }
 function paintDiscText(ctx, node, x, y, isCenter, theme, { sub, popularity }) {
   const hasIPA = !!node.ipa;
-  const scale = labelFontSize(node, isCenter);
-  const labelY = y + insideLabelOffset(node, isCenter);
   const lp = node._lp;
+  const scale = lp?.size ?? labelFontSize(node, isCenter);
+  const labelY = y + insideLabelOffset(node, isCenter);
   const text = lp ? lp.text : node.label ?? "";
   const showMain = !node._noLabel && !(lp && lp.hidden) && text;
   ctx.textAlign = "center";
@@ -1128,7 +1128,7 @@ function drawDiscBatch(ctx, items, theme) {
       const n = it.node, lp = n._lp;
       const text = lp ? lp.text : String(n.label ?? "");
       const show = !(lp && lp.hidden) && text;
-      return { it, n, lp, text, show, size: labelFontSize(n, false) };
+      return { it, n, lp, text, show, size: lp?.size ?? labelFontSize(n, false) };
     });
     labelled.sort((p, q) => p.size - q.size);
     let font = "";
@@ -2199,6 +2199,7 @@ var Renderer = class {
         Object.assign(node, { shape: "pill", w: 40, h: 22, stroke: theme.accent ?? theme.centerGlow, label: n.label, labelSize: 11 });
       } else if (lp && !lp.hidden) {
         node.label = lp.text;
+        if (lp.size) node.labelSize = lp.size;
         node.labelX = o.x + lp.dx;
         node.labelY = o.y + lp.dy;
         if (lp.inside) {
@@ -2408,7 +2409,20 @@ function placeLabels(items, opts) {
   for (const it of items) discs.add({ x0: it.x - it.r, y0: it.y - it.r, x1: it.x + it.r, y1: it.y + it.r, owner: it.id });
   for (const o of opts.obstacles ?? []) discs.add(o);
   const order = items.map((it, i) => ({ it, i })).sort((a, b) => (b.it.fixed ? 1 : 0) - (a.it.fixed ? 1 : 0) || (b.it.priority ?? 0) - (a.it.priority ?? 0) || a.i - b.i);
+  const minScale = opts.minScale ?? 0.7;
   for (const { it } of order) {
+    if (opts.insideOnly) {
+      const fitW = it.fitW ?? Math.max(0, 2 * it.r - 6);
+      let size = it.size;
+      const floor = Math.max(7, Math.round(it.size * minScale * 2) / 2);
+      while (size > floor && measure(it.text, size) > fitW) size = Math.max(floor, size - 0.5);
+      const t2 = it.fixed ? it.text : truncateToWidth(it.text, fitW, (s) => measure(s, size));
+      const w2 = measure(t2, size), h2 = size * 1.15, iy2 = it.insideY ?? 0;
+      const b2 = t2 ? { x0: it.x - w2 / 2 - pad, x1: it.x + w2 / 2 + pad, y0: it.y + iy2 - h2 / 2 - pad, y1: it.y + iy2 + h2 / 2 + pad, owner: it.id } : null;
+      if (b2) placed.add(b2);
+      out.set(it.id, { text: t2, dx: 0, dy: iy2, inside: true, truncated: t2 !== it.text, hidden: !t2, box: b2, size });
+      continue;
+    }
     const h = it.size * 1.15;
     const w = measure(it.text, it.size);
     const iy = it.insideY ?? 0;
@@ -3315,7 +3329,7 @@ function sceneToSVG(scene) {
 }
 
 // src/index.js
-var VERSION = "0.2.0";
+var VERSION = "0.2.1";
 var EDGE_TOL_MOUSE = 6;
 var EDGE_TOL_TOUCH = 14;
 var DRAG_THRESHOLD = 4;
@@ -3542,7 +3556,7 @@ var MondoGraph = class {
   selectEdge(id) {
     this._selectedEdgeId = id == null ? null : String(id);
     this._renderer.selectedEdgeId = this._selectedEdgeId;
-    this._renderer.invalidateOverlay();
+    this._touchEdgeFocus();
   }
   get selectedEdge() {
     return this._selectedEdgeId ? this._edgeById.get(this._selectedEdgeId) ?? null : null;
@@ -3795,7 +3809,8 @@ var MondoGraph = class {
     const font = this._theme.font;
     r.labelPlacement = placeLabels(r.labelItems(this._targets), {
       measure: (text, size) => r.measure(text, `700 ${size}px ${font}`),
-      obstacles
+      obstacles,
+      insideOnly: this._opts.labels === "inside"
     });
     r.invalidate();
   }
@@ -3830,7 +3845,21 @@ var MondoGraph = class {
   _edgeAlphaOf(e) {
     if (this._fadedEdges.has(e.id)) return this._theme.fadeAlpha ?? 0.12;
     if (this._highlight && !this._highlight.has(e.id) && !(this._highlight.has(e.from) && this._highlight.has(e.to))) return 0.3;
+    const ef = this._opts.edgeFocus;
+    if (ef) {
+      const r = this._renderer;
+      const live = [this._centerId, r.hoveredId, r.focusedId];
+      const sel = this._selectedEdgeId ? this._edgeById.get(this._selectedEdgeId) : null;
+      if (sel) live.push(sel.from, sel.to);
+      if (e.id === this._selectedEdgeId || live.includes(e.from) || live.includes(e.to)) return 1;
+      return typeof ef === "number" ? ef : 0.12;
+    }
     return 1;
+  }
+  /** Under edgeFocus the base layer depends on the node in hand. */
+  _touchEdgeFocus() {
+    if (this._opts.edgeFocus) this._renderer.invalidate();
+    else this._renderer.invalidateOverlay();
   }
   _edgeVisible(e) {
     const st = this._renderer._styleMap().get(e.id);
@@ -3886,8 +3915,10 @@ var MondoGraph = class {
         if (node && chip) this._opts.onChipSelect?.(node, chip);
       },
       setFocus: (id) => {
+        const was = this._renderer.focusedId;
         this._renderer.focusedId = id;
-        this._renderer.invalidateOverlay();
+        if (was !== id) this._touchEdgeFocus();
+        else this._renderer.invalidateOverlay();
       },
       setFocusedEdge: (id) => {
         this._renderer.focusedEdgeId = id;
@@ -4073,7 +4104,10 @@ var MondoGraph = class {
     r.hoveredEdgeId = hit?.kind === "edge" ? hit.id : null;
     r.hoveredChip = hit?.kind === "chip" ? { nodeId: hit.nodeId, chipId: hit.chip.id } : null;
     const now = `${r.hoveredId}|${r.hoveredEdgeId}|${r.hoveredChip?.nodeId}|${r.hoveredChip?.chipId}`;
-    if (prev !== now) r.invalidateOverlay();
+    if (prev !== now) {
+      if (prev.split("|")[0] !== now.split("|")[0]) this._touchEdgeFocus();
+      else r.invalidateOverlay();
+    }
     r.canvas.style.cursor = hit ? "pointer" : "grab";
     if (!hit) {
       this._tooltip.hide();

@@ -184,3 +184,26 @@ test('placeLabels: a label wider than its disc (fitW) moves outside instead of s
   assert.equal(p.text, 'Radoslava');
   assert.ok(p.dy > 18, 'below the disc');
 });
+
+test('placeLabels insideOnly: every label stays in its own disc, shrunk then truncated, never hidden', () => {
+  const items = [
+    { id: 'c', x: 0, y: 0, r: 40, text: 'Ivan', size: 19, fixed: true },
+    { id: 'a', x: 60, y: 0, r: 20, text: 'Jo', size: 12, fitW: 36 },
+    { id: 'b', x: 64, y: 4, r: 20, text: 'Giovanni', size: 12, fitW: 36 },          // overlaps a: still inside
+    { id: 'd', x: 200, y: 0, r: 20, text: 'Gianniccolo di Vittorio', size: 12, fitW: 36 },
+  ];
+  const m = placeLabels(items, { measure: lm, insideOnly: true });
+  for (const id of ['a', 'b', 'd']) {
+    const p = m.get(id);
+    assert.equal(p.inside, true, id);
+    assert.equal(p.dx, 0, id);
+    assert.equal(p.hidden, false, id);
+    assert.ok(lm(p.text, p.size) <= 36 + 1e-9, id);
+  }
+  assert.equal(m.get('a').text, 'Jo');
+  assert.equal(m.get('a').size, 12);
+  assert.ok(m.get('b').size < 12, 'shrinks before truncating');
+  assert.ok(m.get('d').text.endsWith('…'));
+  assert.ok(m.get('d').size >= 7);
+  assert.equal(m.get('c').text, 'Ivan');
+});

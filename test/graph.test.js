@@ -369,3 +369,27 @@ test('a11y: every incident edge gets a button, even two between the same pair', 
   g.setData({ nodes: [{ id: 'a' }, { id: 'b' }], edges: [{ id: 'x1', from: 'a', to: 'b', family: 'F2' }, { id: 'x2', from: 'b', to: 'a', family: 'F3' }] }, 'a');
   assert.deepEqual(mirror().querySelectorAll('button.mg-edge').map(b => b.dataset.edgeId).sort(), ['x1', 'x2']);
 });
+
+test('edgeFocus: the centre’s edges and the node in hand stay strong, the rest faint', () => {
+  const host = makeContainer();
+  const fg = new MondoGraph({ container: host, data: DATA, centerId: 'ivan', edgeFocus: true, theme: 'editorialLight' });
+  const e6 = fg._edgeById.get('e6'), e1 = fg._edgeById.get('e1');
+  assert.equal(fg._edgeAlphaOf(e1), 1);
+  assert.equal(fg._edgeAlphaOf(e6), 0.12);
+  fg._renderer.hoveredId = 'juan';
+  assert.equal(fg._edgeAlphaOf(e6), 1);
+  fg._renderer.hoveredId = null;
+  fg.selectEdge('e6');
+  assert.equal(fg._edgeAlphaOf(e6), 1);
+  fg.destroy();
+  const plain = new MondoGraph({ container: makeContainer(), data: DATA, centerId: 'ivan', theme: 'editorialLight' });
+  assert.equal(plain._edgeAlphaOf(plain._edgeById.get('e6')), 1);
+  plain.destroy();
+});
+
+test('labels: "inside" passes insideOnly to placement: every label is in its disc', () => {
+  const fg = new MondoGraph({ container: makeContainer(), data: DATA, centerId: 'ivan', labels: 'inside', theme: 'editorialLight' });
+  assert.ok(fg._renderer.labelPlacement.size >= 5)
+  for (const [, p] of fg._renderer.labelPlacement) { assert.equal(p.inside, true); assert.equal(p.dx, 0) }
+  fg.destroy();
+});
